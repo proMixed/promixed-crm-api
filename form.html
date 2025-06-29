@@ -65,3 +65,38 @@
     <label>הערות:<br>
       <textarea name="notes"></textarea>
     </label><br><br>
+    <button type="submit">שמור לקוח</button>
+  </form>
+
+  <p id="responseMsg"></p>
+
+  <script>
+    document.getElementById('clientForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        company: form.company.value,
+        first_name: form.first_name.value,
+        last_name: form.last_name.value,
+        business_id: form.business_id.value,
+        phone: form.phone.value,
+        contact_phone: form.contact_phone.value,
+        email: form.email.value,
+        sector: form.sector.value,
+        source: form.source.value,
+        created_by: form.created_by.value,
+        notes: form.notes.value
+      };
+
+      const res = await fetch('https://promixed-crm-api.onrender.com/clients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      const result = await res.json();
+      document.getElementById('responseMsg').innerText = JSON.stringify(result);
+    });
+  </script>
+</body>
+</html>
