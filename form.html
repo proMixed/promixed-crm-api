@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>טופס לקוח - פרומיקסט</title>
+</head>
+<body>
+  <h2>הזנת לקוח חדש</h2>
+  <form id="clientForm">
+    <label>שם חברה:<br>
+      <input type="text" name="company" required>
+    </label><br><br>
+
+    <label>שם פרטי:<br>
+      <input type="text" name="first_name" required>
+    </label><br><br>
+
+    <label>שם משפחה:<br>
+      <input type="text" name="last_name" required>
+    </label><br><br>
+
+    <label>ח.פ / ע.מ / סימול:<br>
+      <input type="text" name="business_id">
+    </label><br><br>
+
+    <label>טלפון לקוח:<br>
+      <input type="tel" name="phone">
+    </label><br><br>
+
+    <label>טלפון איש קשר:<br>
+      <input type="tel" name="contact_phone">
+    </label><br><br>
+
+    <label>אימייל:<br>
+      <input type="email" name="email">
+    </label><br><br>
+
+    <label>מגזר:<br>
+      <select name="sector" required>
+        <option value="עסקי">עסקי</option>
+        <option value="ממשלתי">ממשלתי</option>
+        <option value="ציבורי">ציבורי</option>
+        <option value="חינוך">חינוך</option>
+        <option value="אחר">אחר</option>
+      </select>
+    </label><br><br>
+
+    <label>הגיע דרך:<br>
+      <select name="source" required>
+        <option value="לקוח">לקוח</option>
+        <option value="אתר">אתר</option>
+        <option value="רשתות חברתיות">רשתות חברתיות</option>
+        <option value="פרסום">פרסום</option>
+        <option value="כנס">כנס</option>
+        <option value="גוגל">גוגל</option>
+        <option value="יזום">יזום</option>
+        <option value="אחר">אחר</option>
+      </select>
+    </label><br><br>
+
+    <label>שם מזין הטופס:<br>
+      <input type="text" name="created_by">
+    </label><br><br>
+
+    <label>הערות:<br>
+      <textarea name="notes"></textarea>
+    </label><br><br>
