@@ -1,3 +1,4 @@
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI
 from pydantic import BaseModel
 from typing import Optional
@@ -66,3 +67,11 @@ def create_client(client: Client):
     conn.commit()
     cur.close()
     return {"id": client_id}
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # אפשר לשים במקום * דומיין מסוים אם רוצים הגבלה
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
