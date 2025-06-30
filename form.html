@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>טופס לקוחות - פרומיקסט</title>
+  <title>טופס לקוחות - Promixed CRM</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <style>
     body {
@@ -11,116 +11,141 @@
       font-family: Arial, sans-serif;
     }
     .logo {
-      width: 160px;
+      width: 140px;
     }
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 1rem;
+      padding: 1rem 2rem;
     }
     .container-split {
       display: flex;
       gap: 2rem;
-      padding: 2rem;
+      padding: 1rem 2rem;
     }
     .form-section {
       flex: 1;
       background-color: #ffffff;
-      padding: 2rem;
+      padding: 1rem 1.5rem;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .form-control-sm {
+      padding: .25rem .5rem;
+      font-size: .875rem;
+    }
+    label {
+      margin-bottom: 0.2rem;
+      font-weight: bold;
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
   <div class="header">
+    <h5 class="text-primary">טופס לקוחות - Promixed CRM</h5>
     <img src="promixed-new-logo_2022A.png" alt="Promixed Logo" class="logo">
-    <h2>טופס לקוחות</h2>
   </div>
 
   <div class="container-split">
     <!-- טופס לקוחות -->
     <div class="form-section">
       <form id="clientForm">
-        <div class="mb-3">
-          <label class="form-label">שם חברה *</label>
-          <input type="text" class="form-control" name="company_name" required>
+        <div class="row g-3">
+          <div class="col-6">
+            <label class="form-label">מזין הטופס *</label>
+            <input type="text" class="form-control form-control-sm" name="entered_by" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label">שם חברה *</label>
+            <input type="text" class="form-control form-control-sm" name="company_name" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label">שם פרטי *</label>
+            <input type="text" class="form-control form-control-sm" name="first_name" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label">שם משפחה *</label>
+            <input type="text" class="form-control form-control-sm" name="last_name" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label">טלפון לקוח *</label>
+            <input type="tel" class="form-control form-control-sm" name="client_phone" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label">טלפון איש קשר</label>
+            <input type="tel" class="form-control form-control-sm" name="contact_phone">
+          </div>
+          <div class="col-6">
+            <label class="form-label">אימייל *</label>
+            <input type="email" class="form-control form-control-sm" name="email" required>
+          </div>
+          <div class="col-6">
+            <label class="form-label">מגזר *</label>
+            <select class="form-select form-select-sm" name="sector" required>
+              <option value="">בחר מגזר</option>
+              <option>חינוך</option>
+              <option>צה"ל</option>
+              <option>בריאות</option>
+              <option>תחבורה</option>
+              <option>משרד ממשלתי</option>
+              <option>חברה פרטית</option>
+              <option>אחר</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label class="form-label">הגיע דרך *</label>
+            <select class="form-select form-select-sm" name="source" required>
+              <option value="">בחר מקור</option>
+              <option>טלפון</option>
+              <option>המלצה</option>
+              <option>כנס</option>
+              <option>אתר</option>
+              <option>פייסבוק</option>
+              <option>אינסטגרם</option>
+              <option>אחר</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">הערות</label>
+            <textarea class="form-control form-control-sm" name="notes" rows="2"></textarea>
+          </div>
+          <input type="hidden" name="created_at" id="created_at">
+          <div class="col-12">
+            <button type="submit" class="btn btn-primary btn-sm w-100">שמור</button>
+          </div>
         </div>
-        <div class="mb-3">
-          <label class="form-label">שם פרטי *</label>
-          <input type="text" class="form-control" name="first_name" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">שם משפחה *</label>
-          <input type="text" class="form-control" name="last_name" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">טלפון לקוח *</label>
-          <input type="tel" class="form-control" name="client_phone" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">טלפון איש קשר</label>
-          <input type="tel" class="form-control" name="contact_phone">
-        </div>
-        <div class="mb-3">
-          <label class="form-label">אימייל *</label>
-          <input type="email" class="form-control" name="email" required>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">מגזר *</label>
-          <select class="form-select" name="sector" required>
-            <option value="">בחר מגזר</option>
-            <option>חינוך</option>
-            <option>צה"ל</option>
-            <option>בריאות</option>
-            <option>תחבורה</option>
-            <option>משרד ממשלתי</option>
-            <option>חברה פרטית</option>
-            <option>אחר</option>
-          </select>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">הגיע דרך *</label>
-          <select class="form-select" name="source" required>
-            <option value="">בחר מקור</option>
-            <option>טלפון</option>
-            <option>המלצה</option>
-            <option>כנס</option>
-            <option>אתר</option>
-            <option>פייסבוק</option>
-            <option>אינסטגרם</option>
-            <option>אחר</option>
-          </select>
-        </div>
-        <div class="mb-3">
-          <label class="form-label">הערות</label>
-          <textarea class="form-control" name="notes" rows="2"></textarea>
-        </div>
-        <button type="submit" class="btn btn-primary">שמור</button>
       </form>
     </div>
 
-    <!-- מקום להזדמנות (בהמשך) -->
-    <div class="form-section text-center text-muted">
+    <!-- צד שמאל להזדמנות בעתיד -->
+    <div class="form-section text-center text-muted d-flex align-items-center justify-content-center">
       <p>כאן יופיע טופס הזדמנות</p>
     </div>
   </div>
 
   <script>
-    document.getElementById('clientForm').addEventListener('submit', function(e) {
+    const form = document.getElementById('clientForm');
+    document.getElementById('created_at').value = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const formData = new FormData(e.target);
+      const formData = new FormData(form);
       const data = Object.fromEntries(formData);
-      data.created_at = new Date().toISOString();
-      fetch("https://promixed-crm-api.onrender.com/add-client", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data)
-      })
-      .then(res => res.json())
-      .then(res => alert("נשמר בהצלחה!"))
-      .catch(err => alert("שגיאה בשמירה"));
+      try {
+        const res = await fetch("https://promixed-crm-api.onrender.com/add-client", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('שגיאה בשליחה');
+        alert("הטופס נשמר בהצלחה!");
+        form.reset();
+        document.getElementById('created_at').value = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      } catch (err) {
+        alert("אירעה שגיאה: " + err.message);
+      }
     });
   </script>
 </body>
