@@ -127,5 +127,14 @@ document.getElementById("searchInput").addEventListener("input", function () {
         console.error("Error loading clients:", error);
       });
   </script>
+document.getElementById("searchInput").addEventListener("input", function () {
+  const filter = this.value.toLowerCase();
+  const rows = document.querySelectorAll("#clientsBody tr");
+  rows.forEach(row => {
+    const text = row.textContent.toLowerCase();
+    row.style.display = text.includes(filter) ? "" : "none";
+  });
+});
+
 </body>
 </html>
