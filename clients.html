@@ -1,62 +1,117 @@
+
 <!DOCTYPE html>
-<html lang="he">
+<html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF- />
   <title>רשימת לקוחות</title>
   <style>
-    table {
-      border-collapse: collapse;
-      width: 100%;
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f8fc;
+      margin: 0;
+      padding: 20px;
       direction: rtl;
     }
+    header {
+      background-color: #1e88e5;
+      color: white;
+      padding: 20px;
+      text-align: center;
+      font-size: 24px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    nav {
+      margin: 10px 0;
+      text-align: center;
+    }
+    nav a {
+      margin: 0 10px;
+      text-decoration: none;
+      color: #1e88e5;
+      font-weight: bold;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background-color: white;
+    }
     th, td {
-      border: 1px solid #999;
-      padding: 8px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: center;
     }
     th {
-      background-color: #eee;
+      background-color: #e3f2fd;
+    }
+    tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .container {
+      max-width: 1200px;
+      margin: auto;
     }
   </style>
 </head>
 <body>
-  <h1>רשימת לקוחות</h1>
-  <table id="clientsTable">
-    <thead>
-      <tr>
-        <th>מספר</th>
-        <th>שם</th>
-        <th>נייד</th>
-        <th>טלפון</th>
-        <th>אזור</th>
-        <th>עיר</th>
-        <th>רחוב</th>
-        <th>אימייל</th>
-        <th>תאריך</th>
-        <th>הערה</th>
-        <th>סטטוס</th>
-        <th>סוג</th>
-      </tr>
-    </thead>
-    <tbody id="clientsBody"></tbody>
-  </table>
+  <header>
+    רשימת לקוחות CRM - פרומיקסט
+  </header>
+  <nav>
+    <a href="form.html">הוספת לקוח חדש</a>
+    <a href="#">לוח מחוונים</a>
+    <a href="#">הגדרות</a>
+  </nav>
+  <div class="container">
+    <table id="clientsTable">
+      <thead>
+        <tr>
+          <th>שם חברה</th>
+          <th>שם פרטי</th>
+          <th>שם משפחה</th>
+          <th>ח.פ / ע.מ</th>
+          <th>טלפון לקוח</th>
+          <th>טלפון איש קשר</th>
+          <th>אימייל</th>
+          <th>מגזר</th>
+          <th>הגיע דרך</th>
+          <th>שם מזין</th>
+          <th>הערות</th>
+          <th>תאריך יצירה</th>
+        </tr>
+      </thead>
+      <tbody id="clientsBody">
+        <tr><td colspan="12">טוען נתונים...</td></tr>
+      </tbody>
+    </table>
+  </div>
 
   <script>
     fetch("https://promixed-crm-api.onrender.com/clients")
       .then(response => response.json())
       .then(data => {
         const tbody = document.getElementById("clientsBody");
+        tbody.innerHTML = "";
         data.forEach(client => {
           const row = document.createElement("tr");
-          client.forEach(value => {
-            const cell = document.createElement("td");
-            cell.textContent = value || "";
-            row.appendChild(cell);
+          const fields = [
+            client[1], client[2], client[3], client[4],
+            client[5], client[6], client[7], client[8],
+            client[9], client[10], client[11], client[12]
+          ];
+          fields.forEach(field => {
+            const td = document.createElement("td");
+            td.textContent = field || "";
+            row.appendChild(td);
           });
           tbody.appendChild(row);
         });
       })
-      .catch(error => console.error("שגיאה בקבלת נתונים:", error));
+      .catch(error => {
+        const tbody = document.getElementById("clientsBody");
+        tbody.innerHTML = '<tr><td colspan="12">שגיאה בטעינת נתונים</td></tr>';
+        console.error("Error loading clients:", error);
+      });
   </script>
 </body>
 </html>
-
