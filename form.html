@@ -2,100 +2,175 @@
 <html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8">
-  <title>טופס לקוח - פרומיקסט</title>
+  <title>הוספת לקוח חדש</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Heebo', sans-serif;
+      background-color: #f0f8ff;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #004e64;
+      color: white;
+      padding: 20px;
+    }
+
+    header img {
+      height: 60px;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 30px auto;
+      background-color: #ffffff;
+      padding: 25px 30px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.15);
+      border-radius: 12px;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: #004e64;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #007c91;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      margin-top: 25px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #005f6b;
+    }
+
+    .success-message {
+      color: green;
+      margin-top: 15px;
+    }
+
+    .error-message {
+      color: red;
+      margin-top: 15px;
+    }
+  </style>
 </head>
 <body>
-  <h2>הזנת לקוח חדש</h2>
-  <form id="clientForm">
-    <label>שם חברה:<br>
-      <input type="text" name="company" required>
-    </label><br><br>
+  <header>
+    <h1>הוספת לקוח חדש</h1>
+    <img src="promixed-new-logo_2022A.png" alt="Promixed Logo">
+  </header>
 
-    <label>שם פרטי:<br>
+  <div class="container">
+    <h2>טופס הזנת לקוח</h2>
+    <form id="clientForm">
+      <label>שם חברה:</label>
+      <input type="text" name="company_name" required>
+
+      <label>שם פרטי:</label>
       <input type="text" name="first_name" required>
-    </label><br><br>
 
-    <label>שם משפחה:<br>
-      <input type="text" name="last_name" required>
-    </label><br><br>
+      <label>שם משפחה:</label>
+      <input type="text" name="last_name">
 
-    <label>ח.פ / ע.מ / סימול:<br>
-      <input type="text" name="business_id">
-    </label><br><br>
+      <label>ת.ז / ח.פ:</label>
+      <input type="text" name="id_number">
 
-    <label>טלפון לקוח:<br>
-      <input type="tel" name="phone">
-    </label><br><br>
+      <label>טלפון לקוח:</label>
+      <input type="text" name="phone">
 
-    <label>טלפון איש קשר:<br>
-      <input type="tel" name="contact_phone">
-    </label><br><br>
+      <label>טלפון איש קשר:</label>
+      <input type="text" name="contact_phone">
 
-    <label>אימייל:<br>
+      <label>אימייל:</label>
       <input type="email" name="email">
-    </label><br><br>
 
-    <label>מגזר:<br>
-      <select name="sector" required>
-        <option value="עסקי">עסקי</option>
-        <option value="ממשלתי">ממשלתי</option>
-        <option value="ציבורי">ציבורי</option>
-        <option value="חינוך">חינוך</option>
-        <option value="אחר">אחר</option>
-      </select>
-    </label><br><br>
+      <label>מגזר:</label>
+      <input type="text" name="sector">
 
-    <label>הגיע דרך:<br>
-      <select name="source" required>
-        <option value="לקוח">לקוח</option>
-        <option value="אתר">אתר</option>
-        <option value="רשתות חברתיות">רשתות חברתיות</option>
-        <option value="פרסום">פרסום</option>
-        <option value="כנס">כנס</option>
-        <option value="גוגל">גוגל</option>
-        <option value="יזום">יזום</option>
-        <option value="אחר">אחר</option>
-      </select>
-    </label><br><br>
+      <label>הגיע דרך:</label>
+      <input type="text" name="source">
 
-    <label>שם מזין הטופס:<br>
-      <input type="text" name="created_by">
-    </label><br><br>
+      <label>שם מזין:</label>
+      <input type="text" name="entered_by">
 
-    <label>הערות:<br>
+      <label>הערות:</label>
       <textarea name="notes"></textarea>
-    </label><br><br>
-    <button type="submit">שמור לקוח</button>
-  </form>
 
-  <p id="responseMsg"></p>
+      <label>תאריך:</label>
+      <input type="date" name="created_at">
+
+      <label>סטטוס:</label>
+      <input type="text" name="status">
+
+      <label>סוג:</label>
+      <input type="text" name="type">
+
+      <button type="submit">שמור לקוח</button>
+      <div class="success-message" id="successMsg"></div>
+      <div class="error-message" id="errorMsg"></div>
+    </form>
+  </div>
 
   <script>
-    document.getElementById('clientForm').addEventListener('submit', async function(e) {
+    const form = document.getElementById('clientForm');
+    const successMsg = document.getElementById('successMsg');
+    const errorMsg = document.getElementById('errorMsg');
+
+    form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      const form = e.target;
-      const data = {
-        company: form.company.value,
-        first_name: form.first_name.value,
-        last_name: form.last_name.value,
-        business_id: form.business_id.value,
-        phone: form.phone.value,
-        contact_phone: form.contact_phone.value,
-        email: form.email.value,
-        sector: form.sector.value,
-        source: form.source.value,
-        created_by: form.created_by.value,
-        notes: form.notes.value
-      };
+      successMsg.textContent = '';
+      errorMsg.textContent = '';
 
-      const res = await fetch('https://promixed-crm-api.onrender.com/clients', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => data[key] = value);
 
-      const result = await res.json();
-      document.getElementById('responseMsg').innerText = JSON.stringify(result);
+      try {
+        const res = await fetch('https://promixed-crm-api.onrender.com/clients', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (!res.ok) throw new Error('תקלה בשליחה');
+        successMsg.textContent = '✅ הלקוח נוסף בהצלחה';
+        form.reset();
+      } catch (err) {
+        errorMsg.textContent = '❌ שגיאה בשליחה: ' + err.message;
+      }
     });
   </script>
 </body>
