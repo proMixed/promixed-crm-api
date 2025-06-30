@@ -1,160 +1,179 @@
-
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF- />
-  <title>רשימת לקוחות</title>
+  <meta charset="UTF-8">
+  <title>רשימת לקוחות - פרומיקסט CRM</title>
   <style>
     body {
-      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background-color: #f4f8fc;
+      font-family: Arial, sans-serif;
+      background-color: #f4f9fb;
       margin: 0;
       padding: 20px;
       direction: rtl;
     }
     header {
-      background-color: #1e88e5;
-      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 30px;
+    }
+    #logo {
+      height: 80px;
+    }
+    .summary-box {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background-color: #d5f0f9;
+      border-radius: 12px;
       padding: 20px;
-      text-align: center;
-      font-size: 24px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    nav {
-      margin: 10px 0;
-      text-align: center;
-    }
-    nav a {
-      margin: 0 10px;
-      text-decoration: none;
-      color: #1e88e5;
+      max-width: 300px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       font-weight: bold;
+    }
+    .summary-box .label {
+      font-size: 20px;
+      color: #0c4a60;
+    }
+    .summary-box .value {
+      font-size: 24px;
+      color: #09728c;
+    }
+    #searchInput {
+      width: 300px;
+      padding: 10px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
     }
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 20px;
       background-color: white;
     }
     th, td {
       padding: 10px;
-      border: 1px solid #ddd;
       text-align: center;
+      border-bottom: 1px solid #ddd;
     }
     th {
-      background-color: #e3f2fd;
+      background-color: #e2f1f8;
+      cursor: pointer;
     }
-    tr:nth-child(even) {
-      background-color: #f9f9f9;
-    }
-    .container {
-      max-width: 1200px;
-      margin: auto;
+    th.sortable:hover {
+      background-color: #d1eaf6;
     }
   </style>
 </head>
 <body>
   <header>
-    רשימת לקוחות CRM - פרומיקסט
+    <img id="logo" src="promixed-new-logo_2022A.png" alt="לוגו פרומיקסט">
+    <div class="summary-box">
+      <div class="label">Forecast</div>
+      <div class="value" id="forecastSum">0%</div>
+    </div>
   </header>
-  <nav>
-    <a href="form.html">הוספת לקוח חדש</a>
-    <a href="#">לוח מחוונים</a>
-    <a href="#">הגדרות</a>
-  </nav>
-  <div class="container">
-<label>
-  🔎 חיפוש:
-  <input type="text" id="searchInput" placeholder="חיפוש לפי שם חברה, פרטי, מגזר, מזין, תאריך..." />
-</label>
-    <table id="clientsTable">
-      <thead>
-        <tr>
-          <th>שם חברה</th>
-          <th>שם פרטי</th>
-          <th>שם משפחה</th>
-          <th>ח.פ / ע.מ</th>
-          <th>טלפון לקוח</th>
-          <th>טלפון איש קשר</th>
-          <th>אימייל</th>
-          <th>מגזר</th>
-          <th>הגיע דרך</th>
-          <th>שם מזין</th>
-          <th>הערות</th>
-          <th>תאריך יצירה</th>
-        </tr>
-      </thead>
-      <tbody id="clientsBody">
-        <tr><td colspan="12">טוען נתונים...</td></tr>
-      </tbody>
-    </table>
-  </div>
-<script>
-  // פונקציה להמרת תאריך פורמט ISO לפורמט קריא
-  const formatDate = (isoDate) => {
-    const date = new Date(isoDate);
-    return date.toLocaleString("he-IL", {
-      dateStyle: "short",
-      timeStyle: "short"
-    });
-  };
+
+  <input type="text" id="searchInput" placeholder="הקלד שם, טלפון, מגזר, תאריך...">
+
+  <table id="clientsTable">
+    <thead>
+      <tr>
+        <th class="sortable">שם חברה</th>
+        <th class="sortable">שם פרטי</th>
+        <th class="sortable">שם משפחה</th>
+        <th>ח.פ / ת.ז</th>
+        <th>טלפון לקוח</th>
+        <th>טלפון איש קשר</th>
+        <th>אימייל</th>
+        <th class="sortable">מגזר</th>
+        <th class="sortable">הגיע דרך</th>
+        <th class="sortable">שם מזין</th>
+        <th>הערות</th>
+        <th class="sortable">תאריך יצירה</th>
+      </tr>
+    </thead>
+    <tbody id="clientsBody"></tbody>
+  </table>
 
   <script>
-    fetch("https://promixed-crm-api.onrender.com/clients")
-      .then(response => response.json())
+    const API_URL = "https://promixed-crm-api.onrender.com/clients";
+
+    function formatDate(iso) {
+      try {
+        const d = new Date(iso);
+        return d.toLocaleString("he-IL", { dateStyle: 'short', timeStyle: 'short' });
+      } catch {
+        return "";
+      }
+    }
+
+    function updateForecastSum(data) {
+      let total = 0;
+      data.forEach(client => {
+        const val = parseInt(client.forecast || 0);
+        total += val;
+      });
+      document.getElementById("forecastSum").innerText = total + "%";
+    }
+
+    fetch(API_URL)
+      .then(res => res.json())
       .then(data => {
-        const tbody = document.getElementById("clientsBody");
-        tbody.innerHTML = "";
+        updateForecastSum(data);
+        const body = document.getElementById("clientsBody");
+        body.innerHTML = "";
         data.forEach(client => {
           const row = document.createElement("tr");
-          const fields = [
-            client[1], client[2], client[3], client[4],
-            client[5], client[6], client[7], client[8],
-            client[9], client[10], client[11], client[12]
-          ];
-          fields.forEach(field => {
-            const td = document.createElement("td");
-            td.textContent = field || "";
-            row.appendChild(td);
-          });
-          tbody.appendChild(row);
-// חיפוש וסינון טבלה
-document.getElementById("searchInput").addEventListener("input", function () {
-  const filter = this.value.toLowerCase();
-  const rows = document.querySelectorAll("#clientsTable tbody tr");
-  rows.forEach(row => {
-    const text = row.textContent.toLowerCase();
-    row.style.display = text.includes(filter) ? "" : "none";
-  });
-});
-
+          row.innerHTML = `
+            <td>${client.company_name || ""}</td>
+            <td>${client.first_name || ""}</td>
+            <td>${client.last_name || ""}</td>
+            <td>${client.id_number || ""}</td>
+            <td>${client.client_phone || ""}</td>
+            <td>${client.contact_phone || ""}</td>
+            <td>${client.email || ""}</td>
+            <td>${client.sector || ""}</td>
+            <td>${client.source || ""}</td>
+            <td>${client.created_by || ""}</td>
+            <td>${client.notes || ""}</td>
+            <td>${formatDate(client.created_at)}</td>
+          `;
+          body.appendChild(row);
         });
       })
-      .catch(error => {
-        const tbody = document.getElementById("clientsBody");
-        tbody.innerHTML = '<tr><td colspan="12">שגיאה בטעינת נתונים</td></tr>';
-        console.error("Error loading clients:", error);
+      .catch(err => {
+        console.error("שגיאה בשליפת נתונים", err);
+        document.getElementById("clientsBody").innerHTML = "<tr><td colspan='12'>שגיאה בטעינת לקוחות</td></tr>";
       });
-  </script>
-document.getElementById("searchInput").addEventListener("input", function () {
-  const filter = this.value.toLowerCase();
-  const rows = document.querySelectorAll("#clientsBody tr");
-  rows.forEach(row => {
-    const text = row.textContent.toLowerCase();
-    row.style.display = text.includes(filter) ? "" : "none";
-  });
-});
-<script>
-  document.getElementById("searchInput").addEventListener("keyup", function () {
-    const filter = this.value.toLowerCase();
-    const rows = document.querySelectorAll("#clientsTable tbody tr");
 
-    rows.forEach(row => {
-      const text = row.innerText.toLowerCase();
-      row.style.display = text.includes(filter) ? "" : "none";
+    document.getElementById("searchInput").addEventListener("input", function() {
+      const val = this.value.toLowerCase();
+      const rows = document.querySelectorAll("#clientsTable tbody tr");
+      rows.forEach(row => {
+        row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none";
+      });
     });
-  });
-</script>
 
+    document.querySelectorAll("th.sortable").forEach((th, idx) => {
+      th.addEventListener("click", () => {
+        const rows = Array.from(document.querySelectorAll("#clientsTable tbody tr"));
+        const asc = !th.classList.contains("asc");
+        document.querySelectorAll("th").forEach(h => h.classList.remove("asc", "desc"));
+        th.classList.add(asc ? "asc" : "desc");
+
+        rows.sort((a, b) => {
+          const t1 = a.children[idx].innerText.trim();
+          const t2 = b.children[idx].innerText.trim();
+          return asc ? t1.localeCompare(t2) : t2.localeCompare(t1);
+        });
+
+        const tbody = document.getElementById("clientsBody");
+        tbody.innerHTML = "";
+        rows.forEach(r => tbody.appendChild(r));
+      });
+    });
+  </script>
 </body>
 </html>
