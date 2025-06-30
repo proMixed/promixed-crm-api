@@ -1,179 +1,145 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <title>רשימת לקוחות - פרומיקסט CRM</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>רשימת לקוחות - PROMIXED</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f9fb;
-      margin: 0;
-      padding: 20px;
-      direction: rtl;
+      background-color: #f5faff;
+      font-family: 'Segoe UI', sans-serif;
     }
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 30px;
-    }
-    #logo {
+    .logo {
       height: 80px;
     }
-    .summary-box {
+    .forecast-box {
+      background-color: #e0f0ff;
+      border-radius: 12px;
+      padding: 20px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background-color: #d5f0f9;
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 300px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      font-weight: bold;
-    }
-    .summary-box .label {
-      font-size: 20px;
-      color: #0c4a60;
-    }
-    .summary-box .value {
-      font-size: 24px;
-      color: #09728c;
-    }
-    #searchInput {
-      width: 300px;
-      padding: 10px;
       margin-bottom: 20px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
+    .forecast-box h4 {
+      margin: 0;
     }
-    th, td {
-      padding: 10px;
-      text-align: center;
-      border-bottom: 1px solid #ddd;
+    .search-input {
+      max-width: 400px;
+      margin-bottom: 20px;
     }
     th {
-      background-color: #e2f1f8;
       cursor: pointer;
-    }
-    th.sortable:hover {
-      background-color: #d1eaf6;
     }
   </style>
 </head>
-<body>
-  <header>
-    <img id="logo" src="promixed-new-logo_2022A.png" alt="לוגו פרומיקסט">
-    <div class="summary-box">
-      <div class="label">Forecast</div>
-      <div class="value" id="forecastSum">0%</div>
-    </div>
-  </header>
+<body class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <img src="promixed-new-logo_2022A.png" alt="PROMIXED Logo" class="logo">
+    <h2 class="text-primary fw-bold">רשימת לקוחות</h2>
+  </div>
 
-  <input type="text" id="searchInput" placeholder="הקלד שם, טלפון, מגזר, תאריך...">
+  <div class="forecast-box">
+    <h4>סך ההסתברויות (Forcast)</h4>
+    <h4 id="forecastSum">0%</h4>
+  </div>
 
-  <table id="clientsTable">
-    <thead>
-      <tr>
-        <th class="sortable">שם חברה</th>
-        <th class="sortable">שם פרטי</th>
-        <th class="sortable">שם משפחה</th>
-        <th>ח.פ / ת.ז</th>
-        <th>טלפון לקוח</th>
-        <th>טלפון איש קשר</th>
-        <th>אימייל</th>
-        <th class="sortable">מגזר</th>
-        <th class="sortable">הגיע דרך</th>
-        <th class="sortable">שם מזין</th>
-        <th>הערות</th>
-        <th class="sortable">תאריך יצירה</th>
-      </tr>
-    </thead>
-    <tbody id="clientsBody"></tbody>
-  </table>
+  <input type="text" class="form-control search-input" id="searchInput" placeholder="🔍 חיפוש כללי: הקלד שם, טלפון, מגזר, תאריך ...">
+
+  <div class="table-responsive">
+    <table class="table table-bordered table-striped text-center align-middle">
+      <thead class="table-info">
+        <tr>
+          <th onclick="sortTable(0)">שם חברה ⬍</th>
+          <th onclick="sortTable(1)">שם פרטי ⬍</th>
+          <th onclick="sortTable(2)">שם משפחה</th>
+          <th>ח.פ / ת.ז</th>
+          <th>טלפון לקוח</th>
+          <th>טלפון איש קשר</th>
+          <th>אימייל</th>
+          <th onclick="sortTable(7)">מגזר ⬍</th>
+          <th>הגיע דרך</th>
+          <th onclick="sortTable(9)">שם מזין ⬍</th>
+          <th>הערות</th>
+          <th onclick="sortTable(11)">תאריך יצירה ⬍</th>
+        </tr>
+      </thead>
+      <tbody id="clientsBody"></tbody>
+    </table>
+  </div>
 
   <script>
     const API_URL = "https://promixed-crm-api.onrender.com/clients";
 
-    function formatDate(iso) {
-      try {
-        const d = new Date(iso);
-        return d.toLocaleString("he-IL", { dateStyle: 'short', timeStyle: 'short' });
-      } catch {
-        return "";
-      }
+    function formatDate(dateStr) {
+      const date = new Date(dateStr);
+      return isNaN(date) ? "" : `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
     }
 
     function updateForecastSum(data) {
       let total = 0;
-      data.forEach(client => {
-        const val = parseInt(client.forecast || 0);
-        total += val;
+      data.forEach(c => {
+        const val = parseFloat(c[12]);
+        if (!isNaN(val)) total += val;
       });
       document.getElementById("forecastSum").innerText = total + "%";
     }
 
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => {
-        updateForecastSum(data);
-        const body = document.getElementById("clientsBody");
-        body.innerHTML = "";
-        data.forEach(client => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${client.company_name || ""}</td>
-            <td>${client.first_name || ""}</td>
-            <td>${client.last_name || ""}</td>
-            <td>${client.id_number || ""}</td>
-            <td>${client.client_phone || ""}</td>
-            <td>${client.contact_phone || ""}</td>
-            <td>${client.email || ""}</td>
-            <td>${client.sector || ""}</td>
-            <td>${client.source || ""}</td>
-            <td>${client.created_by || ""}</td>
-            <td>${client.notes || ""}</td>
-            <td>${formatDate(client.created_at)}</td>
-          `;
-          body.appendChild(row);
+    function loadClients() {
+      fetch(API_URL)
+        .then(res => res.json())
+        .then(data => {
+          updateForecastSum(data);
+          const body = document.getElementById("clientsBody");
+          body.innerHTML = "";
+          data.forEach(c => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${c[1] || ""}</td>
+              <td>${c[9] || ""}</td>
+              <td>${c[10] || ""}</td>
+              <td>${c[3] || ""}</td>
+              <td>${c[2] || ""}</td>
+              <td>${c[11] || ""}</td>
+              <td>${c[6] || ""}</td>
+              <td>${c[7] || ""}</td>
+              <td>${c[8] || ""}</td>
+              <td>${c[5] || ""}</td>
+              <td>${c[4] || ""}</td>
+              <td>${formatDate(c[12])}</td>
+            `;
+            body.appendChild(row);
+          });
+        })
+        .catch(err => {
+          document.getElementById("clientsBody").innerHTML = '<tr><td colspan="12">שגיאה בטעינת הנתונים</td></tr>';
+          console.error("Error:", err);
         });
-      })
-      .catch(err => {
-        console.error("שגיאה בשליפת נתונים", err);
-        document.getElementById("clientsBody").innerHTML = "<tr><td colspan='12'>שגיאה בטעינת לקוחות</td></tr>";
-      });
+    }
 
-    document.getElementById("searchInput").addEventListener("input", function() {
-      const val = this.value.toLowerCase();
-      const rows = document.querySelectorAll("#clientsTable tbody tr");
+    document.getElementById("searchInput").addEventListener("input", function () {
+      const filter = this.value.toLowerCase();
+      const rows = document.querySelectorAll("#clientsBody tr");
       rows.forEach(row => {
-        row.style.display = row.innerText.toLowerCase().includes(val) ? "" : "none";
+        row.style.display = [...row.children].some(td => td.textContent.toLowerCase().includes(filter)) ? "" : "none";
       });
     });
 
-    document.querySelectorAll("th.sortable").forEach((th, idx) => {
-      th.addEventListener("click", () => {
-        const rows = Array.from(document.querySelectorAll("#clientsTable tbody tr"));
-        const asc = !th.classList.contains("asc");
-        document.querySelectorAll("th").forEach(h => h.classList.remove("asc", "desc"));
-        th.classList.add(asc ? "asc" : "desc");
-
-        rows.sort((a, b) => {
-          const t1 = a.children[idx].innerText.trim();
-          const t2 = b.children[idx].innerText.trim();
-          return asc ? t1.localeCompare(t2) : t2.localeCompare(t1);
-        });
-
-        const tbody = document.getElementById("clientsBody");
-        tbody.innerHTML = "";
-        rows.forEach(r => tbody.appendChild(r));
+    function sortTable(colIndex) {
+      const rows = Array.from(document.querySelectorAll("#clientsBody tr"));
+      const sorted = rows.sort((a, b) => {
+        const tA = a.children[colIndex].innerText;
+        const tB = b.children[colIndex].innerText;
+        return tA.localeCompare(tB, 'he');
       });
-    });
+      const body = document.getElementById("clientsBody");
+      body.innerHTML = "";
+      sorted.forEach(r => body.appendChild(r));
+    }
+
+    loadClients();
   </script>
 </body>
 </html>
