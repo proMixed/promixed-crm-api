@@ -89,6 +89,15 @@
       </tbody>
     </table>
   </div>
+<script>
+  // פונקציה להמרת תאריך פורמט ISO לפורמט קריא
+  const formatDate = (isoDate) => {
+    const date = new Date(isoDate);
+    return date.toLocaleString("he-IL", {
+      dateStyle: "short",
+      timeStyle: "short"
+    });
+  };
 
   <script>
     fetch("https://promixed-crm-api.onrender.com/clients")
