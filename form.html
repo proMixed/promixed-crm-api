@@ -119,9 +119,58 @@
       </form>
     </div>
 
-    <!-- צד שמאל להזדמנות בעתיד -->
-    <div class="form-section text-center text-muted d-flex align-items-center justify-content-center">
-      <p>כאן יופיע טופס הזדמנות</p>
+    <!-- טופס הזדמנות -->
+    <div class="form-section">
+      <form id="opportunityForm">
+        <div class="mb-2">
+          <label class="form-label">שם החברה *</label>
+          <input type="text" class="form-control form-control-sm" name="company_name" required>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">שם הפונה (אופציונלי)</label>
+          <input type="text" class="form-control form-control-sm" name="contact_person">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">מתעניין ב:</label>
+          <select class="form-select form-select-sm" name="interest">
+            <option>פיתוח</option>
+            <option>פרויקט</option>
+            <option>מערכת CLASSVR</option>
+            <option>השתלמויות גפ"ן</option>
+            <option>הרצאה / יום שיא</option>
+            <option>רעידות אדמה / צונאמי</option>
+            <option>אחר</option>
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">היקף עסקה (₪)</label>
+          <input type="number" class="form-control form-control-sm" name="deal_amount" id="deal_amount">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">שלב בעסקה</label>
+          <select class="form-select form-select-sm" name="stage" id="stage">
+            <option value="0">0. לא רלוונטי כרגע</option>
+            <option value="1">1. מתעניין</option>
+            <option value="2">2. מצגת / זום / פגישה</option>
+            <option value="3">3. הצעת מחיר</option>
+            <option value="4">4. מו"מ</option>
+            <option value="5">5. הזמין</option>
+            <option value="6">6. למועד מאוחר יותר</option>
+          </select>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">סכום צפוי (₪)</label>
+          <input type="text" class="form-control form-control-sm" id="forecast" readonly>
+        </div>
+        <div class="mb-2">
+          <label class="form-label">הערות</label>
+          <textarea class="form-control form-control-sm" name="notes" rows="2"></textarea>
+        </div>
+        <input type="hidden" name="created_at" id="opp_created_at">
+        <div class="mb-2">
+          <button type="submit" class="btn btn-success btn-sm w-100">שמור הזדמנות</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -143,6 +192,44 @@
         alert("הטופס נשמר בהצלחה!");
         form.reset();
         document.getElementById('created_at').value = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      } catch (err) {
+        alert("אירעה שגיאה: " + err.message);
+      }
+    });
+
+    const oppForm = document.getElementById('opportunityForm');
+    const amountInput = document.getElementById('deal_amount');
+    const stageInput = document.getElementById('stage');
+    const forecastOutput = document.getElementById('forecast');
+    const oppCreated = document.getElementById('opp_created_at');
+
+    oppCreated.value = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+    function calculateForecast() {
+      const amount = parseFloat(amountInput.value) || 0;
+      const stage = parseInt(stageInput.value);
+      const factors = {0:0, 1:0.1, 2:0.3, 3:0.35, 4:0.65, 5:1, 6:0.2};
+      forecastOutput.value = Math.round(amount * (factors[stage] || 0));
+    }
+
+    amountInput.addEventListener('input', calculateForecast);
+    stageInput.addEventListener('change', calculateForecast);
+
+    oppForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(oppForm);
+      const data = Object.fromEntries(formData);
+      try {
+        const res = await fetch("https://promixed-crm-api.onrender.com/add-opportunity", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('שגיאה בשליחה');
+        alert("הזדמנות נשמרה בהצלחה!");
+        oppForm.reset();
+        forecastOutput.value = '';
+        oppCreated.value = new Date().toISOString().slice(0, 19).replace('T', ' ');
       } catch (err) {
         alert("אירעה שגיאה: " + err.message);
       }
