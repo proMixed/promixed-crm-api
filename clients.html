@@ -1,1 +1,62 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>רשימת לקוחות</title>
+  <style>
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      direction: rtl;
+    }
+    th, td {
+      border: 1px solid #999;
+      padding: 8px;
+    }
+    th {
+      background-color: #eee;
+    }
+  </style>
+</head>
+<body>
+  <h1>רשימת לקוחות</h1>
+  <table id="clientsTable">
+    <thead>
+      <tr>
+        <th>מספר</th>
+        <th>שם</th>
+        <th>נייד</th>
+        <th>טלפון</th>
+        <th>אזור</th>
+        <th>עיר</th>
+        <th>רחוב</th>
+        <th>אימייל</th>
+        <th>תאריך</th>
+        <th>הערה</th>
+        <th>סטטוס</th>
+        <th>סוג</th>
+      </tr>
+    </thead>
+    <tbody id="clientsBody"></tbody>
+  </table>
+
+  <script>
+    fetch("https://promixed-crm-api.onrender.com/clients")
+      .then(response => response.json())
+      .then(data => {
+        const tbody = document.getElementById("clientsBody");
+        data.forEach(client => {
+          const row = document.createElement("tr");
+          client.forEach(value => {
+            const cell = document.createElement("td");
+            cell.textContent = value || "";
+            row.appendChild(cell);
+          });
+          tbody.appendChild(row);
+        });
+      })
+      .catch(error => console.error("שגיאה בקבלת נתונים:", error));
+  </script>
+</body>
+</html>
 
