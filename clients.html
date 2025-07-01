@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,66 +9,54 @@
     body {
       background-color: #f5faff;
       font-family: 'Segoe UI', sans-serif;
-      padding: 20px;
     }
-
     .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding-bottom: 20px;
+      padding: 20px;
     }
-
-    .header img {
-      height: 60px;
-    }
-
-    .header-title {
-      font-size: 24px;
+    .header h1 {
+      margin: 0;
       font-weight: bold;
     }
-
-    .search-box {
-      margin-bottom: 15px;
+    table {
+      direction: rtl;
     }
-
     th {
       cursor: pointer;
     }
-
-    .table-container {
-      overflow-x: auto;
+    .search-box {
+      margin: 20px;
+      max-width: 400px;
     }
   </style>
 </head>
-
 <body>
   <div class="header">
-    <img src="https://raw.githubusercontent.com/proMixed/promixed-crm-api/main/Logo%20for%20heaset.png" alt="promixed logo">
-    <div class="header-title">proMixed CRM</div>
+    <h1>רשימת לקוחות</h1>
+    <img src="https://raw.githubusercontent.com/proMixed/promixed-crm-api/main/Logo%20for%20heaset.png" alt="promixed logo" style="height: 60px;">
   </div>
 
-  <h4 class="text-end mb-3">רשימת לקוחות</h4>
-
-  <div class="search-box">
+  <div class="search-box mx-auto">
     <input type="text" id="searchInput" class="form-control" placeholder="🔍 חיפוש כללי: הקלד שם, טלפון, מגזר, תאריך...">
   </div>
 
-  <div class="table-container">
-    <table class="table table-striped table-bordered text-center">
+  <div class="container">
+    <table class="table table-striped table-bordered text-center" id="clientsTable">
       <thead class="table-primary">
         <tr>
           <th onclick="sortTable(0)">שם חברה</th>
           <th onclick="sortTable(1)">שם פרטי</th>
-          <th onclick="sortTable(2)">שם משפחה</th>
-          <th onclick="sortTable(3)">ת.ז / ח.פ</th>
-          <th onclick="sortTable(4)">טלפון לקוח</th>
-          <th onclick="sortTable(5)">טלפון איש קשר</th>
-          <th onclick="sortTable(6)">אימייל</th>
+          <th>שם משפחה</th>
+          <th>ת.ז / ח.פ</th>
+          <th>טלפון לקוח</th>
+          <th>טלפון איש קשר</th>
+          <th>אימייל</th>
           <th onclick="sortTable(7)">מגזר</th>
-          <th onclick="sortTable(8)">הגיע דרך</th>
+          <th>הגיע דרך</th>
           <th onclick="sortTable(9)">שם מזין</th>
-          <th onclick="sortTable(10)">הערות</th>
+          <th>הערות</th>
           <th onclick="sortTable(11)">תאריך יצירה</th>
         </tr>
       </thead>
@@ -81,74 +68,80 @@
 
   <script>
     const API_URL = "https://promixed-crm-api.onrender.com/clients";
+    let originalData = [];
+    let currentSort = { column: -1, direction: 'none' };
+
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => {
+        originalData = [...data];
+        renderTable(data);
+      });
+
+    function renderTable(data) {
+      const tbody = document.getElementById("clientsBody");
+      tbody.innerHTML = "";
+      data.forEach(client => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${client[1] || ""}</td>
+          <td>${client[10] || ""}</td>
+          <td>${client[11] || ""}</td>
+          <td>${client[3] || ""}</td>
+          <td>${client[2] || ""}</td>
+          <td>${client[9] || ""}</td>
+          <td>${client[8] || ""}</td>
+          <td>${client[6] || ""}</td>
+          <td>${client[7] || ""}</td>
+          <td>${client[12] || ""}</td>
+          <td>${client[13] || ""}</td>
+          <td>${formatDate(client[5])}</td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
 
     function formatDate(dateStr) {
-      const date = new Date(dateStr);
-      if (isNaN(date)) return "-";
-      return date.toLocaleString('he-IL', {
-        dateStyle: 'short',
-        timeStyle: 'short'
-      });
+      const d = new Date(dateStr);
+      if (isNaN(d)) return "";
+      return d.toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
     }
 
-    function loadClients() {
-      fetch(API_URL)
-        .then(res => res.json())
-        .then(data => {
-          const tbody = document.getElementById("clientsBody");
-          tbody.innerHTML = "";
-          data.forEach(client => {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-              <td>${client[1] || ""}</td>
-              <td>${client[2] || ""}</td>
-              <td>${client[3] || ""}</td>
-              <td>${client[4] || ""}</td>
-              <td>${client[5] || ""}</td>
-              <td>${client[6] || ""}</td>
-              <td>${client[7] || ""}</td>
-              <td>${client[8] || ""}</td>
-              <td>${client[9] || ""}</td>
-              <td>${client[10] || ""}</td>
-              <td>${client[11] || ""}</td>
-              <td>${formatDate(client[12])}</td>
-            `;
-            tbody.appendChild(row);
-          });
-        })
-        .catch(err => {
-          const tbody = document.getElementById("clientsBody");
-          tbody.innerHTML = `<tr><td colspan="12">שגיאה בטעינת הנתונים</td></tr>`;
-          console.error("Error loading clients:", err);
-        });
-    }
+    function sortTable(colIndex) {
+      if (currentSort.column === colIndex) {
+        if (currentSort.direction === 'asc') {
+          currentSort.direction = 'desc';
+        } else if (currentSort.direction === 'desc') {
+          currentSort.direction = 'none';
+        } else {
+          currentSort.direction = 'asc';
+        }
+      } else {
+        currentSort.column = colIndex;
+        currentSort.direction = 'asc';
+      }
 
-    function sortTable(n) {
-      const table = document.querySelector("table");
-      let rows = Array.from(table.rows).slice(1);
-      const direction = table.getAttribute("data-sort-dir") === "asc" ? "desc" : "asc";
-      table.setAttribute("data-sort-dir", direction);
-      rows.sort((a, b) => {
-        const x = a.cells[n].innerText.trim();
-        const y = b.cells[n].innerText.trim();
-        return direction === "asc" ? x.localeCompare(y) : y.localeCompare(x);
+      if (currentSort.direction === 'none') {
+        renderTable(originalData);
+        return;
+      }
+
+      const sorted = [...originalData].sort((a, b) => {
+        const valA = a[colIndex] || "";
+        const valB = b[colIndex] || "";
+        return currentSort.direction === 'asc'
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
       });
-      const tbody = table.querySelector("tbody");
-      rows.forEach(row => tbody.appendChild(row));
+
+      renderTable(sorted);
     }
 
     document.getElementById("searchInput").addEventListener("input", function () {
-      const value = this.value.toLowerCase();
-      const rows = document.querySelectorAll("#clientsBody tr");
-      rows.forEach(row => {
-        row.style.display = Array.from(row.cells).some(cell =>
-          cell.innerText.toLowerCase().includes(value)
-        ) ? "" : "none";
-      });
+      const term = this.value.toLowerCase();
+      const filtered = originalData.filter(row => row.some(field => (field || "").toLowerCase().includes(term)));
+      renderTable(filtered);
     });
-
-    loadClients();
   </script>
 </body>
-
 </html>
