@@ -1,76 +1,81 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
+
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>רשימת לקוחות - PROMIXED</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <style>
     body {
       background-color: #f5faff;
       font-family: 'Segoe UI', sans-serif;
-    }
-   <body>
-  <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
-    <img src="https://raw.githubusercontent.com/proMixed/promixed-crm-api/main/Logo%20for%20heaset.png" alt="promixed logo" style="height: 60px;">
-    <h2 style="margin: 0;">proMixed CRM</h2>
-  </div>
-
-    }
-    .forecast-box {
-      background-color: #e0f0ff;
-      border-radius: 12px;
       padding: 20px;
+    }
+
+    .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding-bottom: 20px;
     }
-    .forecast-box h4 {
-      margin: 0;
+
+    .header img {
+      height: 60px;
     }
-    .search-input {
-      max-width: 400px;
-      margin-bottom: 20px;
+
+    .header-title {
+      font-size: 24px;
+      font-weight: bold;
     }
+
+    .search-box {
+      margin-bottom: 15px;
+    }
+
     th {
       cursor: pointer;
     }
+
+    .table-container {
+      overflow-x: auto;
+    }
   </style>
 </head>
-<body class="container py-4">
-  <div class="d-flex justify-content-between align-items-center mb-4">
-    <img src="promixed-new-logo_2022A.png" alt="PROMIXED Logo" class="logo">
-    <h2 class="text-primary fw-bold">רשימת לקוחות</h2>
+
+<body>
+  <div class="header">
+    <img src="https://raw.githubusercontent.com/proMixed/promixed-crm-api/main/Logo%20for%20heaset.png" alt="promixed logo">
+    <div class="header-title">proMixed CRM</div>
   </div>
 
-  <div class="forecast-box">
-    <h4>סך ההסתברויות (Forcast)</h4>
-    <h4 id="forecastSum">0%</h4>
+  <h4 class="text-end mb-3">רשימת לקוחות</h4>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" class="form-control" placeholder="🔍 חיפוש כללי: הקלד שם, טלפון, מגזר, תאריך...">
   </div>
 
-  <input type="text" class="form-control search-input" id="searchInput" placeholder="🔍 חיפוש כללי: הקלד שם, טלפון, מגזר, תאריך ...">
-
-  <div class="table-responsive">
-    <table class="table table-bordered table-striped text-center align-middle">
-      <thead class="table-info">
+  <div class="table-container">
+    <table class="table table-striped table-bordered text-center">
+      <thead class="table-primary">
         <tr>
-          <th onclick="sortTable(0)">שם חברה ⬍</th>
-          <th onclick="sortTable(1)">שם פרטי ⬍</th>
+          <th onclick="sortTable(0)">שם חברה</th>
+          <th onclick="sortTable(1)">שם פרטי</th>
           <th onclick="sortTable(2)">שם משפחה</th>
-          <th>ח.פ / ת.ז</th>
-          <th>טלפון לקוח</th>
-          <th>טלפון איש קשר</th>
-          <th>אימייל</th>
-          <th onclick="sortTable(7)">מגזר ⬍</th>
-          <th>הגיע דרך</th>
-          <th onclick="sortTable(9)">שם מזין ⬍</th>
-          <th>הערות</th>
-          <th onclick="sortTable(11)">תאריך יצירה ⬍</th>
+          <th onclick="sortTable(3)">ת.ז / ח.פ</th>
+          <th onclick="sortTable(4)">טלפון לקוח</th>
+          <th onclick="sortTable(5)">טלפון איש קשר</th>
+          <th onclick="sortTable(6)">אימייל</th>
+          <th onclick="sortTable(7)">מגזר</th>
+          <th onclick="sortTable(8)">הגיע דרך</th>
+          <th onclick="sortTable(9)">שם מזין</th>
+          <th onclick="sortTable(10)">הערות</th>
+          <th onclick="sortTable(11)">תאריך יצירה</th>
         </tr>
       </thead>
-      <tbody id="clientsBody"></tbody>
+      <tbody id="clientsBody">
+        <tr><td colspan="12">טוען נתונים...</td></tr>
+      </tbody>
     </table>
   </div>
 
@@ -79,71 +84,71 @@
 
     function formatDate(dateStr) {
       const date = new Date(dateStr);
-      return isNaN(date) ? "" : `${date.toLocaleDateString()} ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
-    }
-
-    function updateForecastSum(data) {
-      let total = 0;
-      data.forEach(c => {
-        const val = parseFloat(c[12]);
-        if (!isNaN(val)) total += val;
+      if (isNaN(date)) return "-";
+      return date.toLocaleString('he-IL', {
+        dateStyle: 'short',
+        timeStyle: 'short'
       });
-      document.getElementById("forecastSum").innerText = total + "%";
     }
 
     function loadClients() {
       fetch(API_URL)
         .then(res => res.json())
         .then(data => {
-          updateForecastSum(data);
-          const body = document.getElementById("clientsBody");
-          body.innerHTML = "";
-          data.forEach(c => {
+          const tbody = document.getElementById("clientsBody");
+          tbody.innerHTML = "";
+          data.forEach(client => {
             const row = document.createElement("tr");
             row.innerHTML = `
-              <td>${c[1] || ""}</td>
-              <td>${c[9] || ""}</td>
-              <td>${c[10] || ""}</td>
-              <td>${c[3] || ""}</td>
-              <td>${c[2] || ""}</td>
-              <td>${c[11] || ""}</td>
-              <td>${c[6] || ""}</td>
-              <td>${c[7] || ""}</td>
-              <td>${c[8] || ""}</td>
-              <td>${c[5] || ""}</td>
-              <td>${c[4] || ""}</td>
-              <td>${formatDate(c[12])}</td>
+              <td>${client[1] || ""}</td>
+              <td>${client[2] || ""}</td>
+              <td>${client[3] || ""}</td>
+              <td>${client[4] || ""}</td>
+              <td>${client[5] || ""}</td>
+              <td>${client[6] || ""}</td>
+              <td>${client[7] || ""}</td>
+              <td>${client[8] || ""}</td>
+              <td>${client[9] || ""}</td>
+              <td>${client[10] || ""}</td>
+              <td>${client[11] || ""}</td>
+              <td>${formatDate(client[12])}</td>
             `;
-            body.appendChild(row);
+            tbody.appendChild(row);
           });
         })
         .catch(err => {
-          document.getElementById("clientsBody").innerHTML = '<tr><td colspan="12">שגיאה בטעינת הנתונים</td></tr>';
-          console.error("Error:", err);
+          const tbody = document.getElementById("clientsBody");
+          tbody.innerHTML = `<tr><td colspan="12">שגיאה בטעינת הנתונים</td></tr>`;
+          console.error("Error loading clients:", err);
         });
     }
 
+    function sortTable(n) {
+      const table = document.querySelector("table");
+      let rows = Array.from(table.rows).slice(1);
+      const direction = table.getAttribute("data-sort-dir") === "asc" ? "desc" : "asc";
+      table.setAttribute("data-sort-dir", direction);
+      rows.sort((a, b) => {
+        const x = a.cells[n].innerText.trim();
+        const y = b.cells[n].innerText.trim();
+        return direction === "asc" ? x.localeCompare(y) : y.localeCompare(x);
+      });
+      const tbody = table.querySelector("tbody");
+      rows.forEach(row => tbody.appendChild(row));
+    }
+
     document.getElementById("searchInput").addEventListener("input", function () {
-      const filter = this.value.toLowerCase();
+      const value = this.value.toLowerCase();
       const rows = document.querySelectorAll("#clientsBody tr");
       rows.forEach(row => {
-        row.style.display = [...row.children].some(td => td.textContent.toLowerCase().includes(filter)) ? "" : "none";
+        row.style.display = Array.from(row.cells).some(cell =>
+          cell.innerText.toLowerCase().includes(value)
+        ) ? "" : "none";
       });
     });
-
-    function sortTable(colIndex) {
-      const rows = Array.from(document.querySelectorAll("#clientsBody tr"));
-      const sorted = rows.sort((a, b) => {
-        const tA = a.children[colIndex].innerText;
-        const tB = b.children[colIndex].innerText;
-        return tA.localeCompare(tB, 'he');
-      });
-      const body = document.getElementById("clientsBody");
-      body.innerHTML = "";
-      sorted.forEach(r => body.appendChild(r));
-    }
 
     loadClients();
   </script>
 </body>
+
 </html>
