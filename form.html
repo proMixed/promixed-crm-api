@@ -19,19 +19,13 @@
     .logo {
       height: 90px;
     }
-    .forecast-box {
-      background-color: #e0f0ff;
-      border-radius: 10px;
-      padding: 10px 20px;
-      margin-top: 10px;
+    .title {
+      font-size: 1.8rem;
       font-weight: bold;
       color: #007bff;
-      text-align: center;
     }
-    .nav-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
+    .top-buttons {
+      text-align: center;
       margin-bottom: 10px;
     }
     .form-container {
@@ -59,9 +53,9 @@
       color: red;
     }
     .success-message {
+      text-align: center;
       color: green;
       font-weight: bold;
-      text-align: center;
       margin-bottom: 10px;
     }
   </style>
@@ -70,51 +64,52 @@
   <div class="container-fluid">
     <div class="header">
       <img src="https://raw.githubusercontent.com/proMixed/promixed-crm-api/main/Logo%20for%20heaset.png" class="logo" alt="ProMixed logo">
-      <h2 class="m-0">proMixed CRM</h2>
+      <div class="title">proMixed CRM</div>
     </div>
-    <div class="nav-buttons">
-      <a href="clients.html" class="btn btn-primary">רשימת לקוחות</a>
-      <a href="#" class="btn btn-primary">רשימת הזדמנויות</a>
+
+    <div class="top-buttons">
+      <button class="btn btn-primary" onclick="location.href='clients.html'">רשימת לקוחות</button>
+      <button class="btn btn-primary" onclick="location.href='opportunities.html'">הזדמנויות</button>
     </div>
-    <div class="forecast-box">תחזית: תתווסף בהמשך</div>
+
+    <div id="successMessage" class="success-message" style="display:none;"></div>
 
     <div class="form-container">
       <!-- טופס הזנת לקוח -->
       <div class="form-section">
         <div class="form-title">הוספת לקוח חדש</div>
-        <div id="clientSuccess" class="success-message" style="display:none">הלקוח נשמר בהצלחה</div>
-        <form onsubmit="event.preventDefault(); saveClient();">
+        <form id="clientForm">
           <div class="mb-2">
             <label class="form-label required">שם חברה</label>
-            <input type="text" class="form-control" id="clientCompany" required>
+            <input type="text" class="form-control" name="company" required>
           </div>
           <div class="mb-2">
             <label class="form-label required">שם פרטי</label>
-            <input type="text" class="form-control" required>
+            <input type="text" class="form-control" name="firstName" required>
           </div>
           <div class="mb-2">
             <label class="form-label">שם משפחה</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" name="lastName">
           </div>
           <div class="mb-2">
             <label class="form-label">ת.ז / ח.פ</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" name="idNumber">
           </div>
           <div class="mb-2">
             <label class="form-label required">טלפון לקוח</label>
-            <input type="text" class="form-control" required>
+            <input type="text" class="form-control" name="phone" required>
           </div>
           <div class="mb-2">
             <label class="form-label">טלפון חברה</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" name="companyPhone">
           </div>
           <div class="mb-2">
             <label class="form-label">אימייל</label>
-            <input type="email" class="form-control">
+            <input type="email" class="form-control" name="email">
           </div>
           <div class="mb-2">
             <label class="form-label required">מגזר</label>
-            <select class="form-select" required>
+            <select class="form-select" name="sector" required>
               <option>חינוך</option>
               <option>עסקי</option>
               <option>פרטי</option>
@@ -123,11 +118,11 @@
           </div>
           <div class="mb-2">
             <label class="form-label required">שם מזין</label>
-            <input type="text" class="form-control" required>
+            <input type="text" class="form-control" name="submitter" required>
           </div>
           <div class="mb-2">
             <label class="form-label">הגיע דרך</label>
-            <select class="form-select">
+            <select class="form-select" name="source">
               <option>טלפון</option>
               <option>אתר</option>
               <option>כנס</option>
@@ -138,9 +133,8 @@
           </div>
           <div class="mb-2">
             <label class="form-label">הערות</label>
-            <textarea class="form-control"></textarea>
+            <textarea class="form-control" name="notes"></textarea>
           </div>
-          <div class="text-end text-muted small">תאריך יצירה: <span id="clientTimestamp"></span></div>
           <button type="submit" class="btn btn-primary mt-2">שמור לקוח</button>
         </form>
       </div>
@@ -148,25 +142,22 @@
       <!-- טופס הזדמנות -->
       <div class="form-section">
         <div class="form-title">הוספת הזדמנות חדשה</div>
-        <div id="opportunitySuccess" class="success-message" style="display:none">ההזדמנות נשמרה בהצלחה</div>
-        <form onsubmit="event.preventDefault(); saveOpportunity();">
+        <form id="opportunityForm">
           <div class="mb-2">
             <label class="form-label">שם חברה</label>
-            <select class="form-select" id="clientSelect">
-              <option>טוען...</option>
-            </select>
+            <select class="form-select" id="clientSelect" name="company"></select>
           </div>
           <div class="mb-2">
             <label class="form-label">לקוח זמני</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" name="tempClient">
           </div>
           <div class="mb-2">
             <label class="form-label">שם פונה מהלקוח</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" name="contact">
           </div>
           <div class="mb-2">
             <label class="form-label">מתעניין ב</label>
-            <select class="form-select">
+            <select class="form-select" name="interest">
               <option>פיתוח</option>
               <option>פרויקט</option>
               <option>מערכת CLASSVR</option>
@@ -178,11 +169,11 @@
           </div>
           <div class="mb-2">
             <label class="form-label">היקף עסקה</label>
-            <input type="number" class="form-control" id="dealValue">
+            <input type="number" class="form-control" name="amount" id="dealValue">
           </div>
           <div class="mb-2">
             <label class="form-label">שלב בעסקה</label>
-            <select class="form-select" id="dealStage">
+            <select class="form-select" name="stage" id="dealStage">
               <option value="10">1. מתעניין</option>
               <option value="30">2. מצגת/זום/פגישה</option>
               <option value="35">3. הצעת מחיר</option>
@@ -193,14 +184,13 @@
             </select>
           </div>
           <div class="mb-2">
-            <label class="form-label">סה"כ תחזית (אחוזים × היקף עסקה)</label>
-            <input type="text" class="form-control" id="forecastResult" readonly>
+            <label class="form-label">סה"כ תחזית</label>
+            <input type="text" class="form-control" id="forecastResult" name="forecast" readonly>
           </div>
           <div class="mb-2">
             <label class="form-label">הערות</label>
-            <textarea class="form-control"></textarea>
+            <textarea class="form-control" name="notes"></textarea>
           </div>
-          <div class="text-end text-muted small">עדכון אחרון: <span id="opportunityTimestamp"></span></div>
           <button type="submit" class="btn btn-success mt-2">שמור הזדמנות</button>
         </form>
       </div>
@@ -211,8 +201,7 @@
     const dealValue = document.getElementById('dealValue');
     const dealStage = document.getElementById('dealStage');
     const forecastResult = document.getElementById('forecastResult');
-    const clientTimestamp = document.getElementById('clientTimestamp');
-    const opportunityTimestamp = document.getElementById('opportunityTimestamp');
+    const clientSelect = document.getElementById('clientSelect');
 
     function updateForecast() {
       const value = parseFloat(dealValue.value) || 0;
@@ -221,34 +210,46 @@
       forecastResult.value = forecast + ' ש"ח';
     }
 
-    function updateTimestamps() {
-      const now = new Date().toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
-      clientTimestamp.textContent = now;
-      opportunityTimestamp.textContent = now;
-    }
-
     function loadClientsFromDB() {
       fetch("https://promixed-crm-api.onrender.com/clients")
         .then(res => res.json())
         .then(data => {
-          const select = document.getElementById("clientSelect");
-          select.innerHTML = data.map(client => `<option>${client[1]}</option>`).join("");
+          clientSelect.innerHTML = data.map(client => `<option>${client[1]}</option>`).join("");
         });
     }
 
-    function saveClient() {
-      document.getElementById('clientSuccess').style.display = 'block';
-    }
+    document.getElementById("clientForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      fetch("https://promixed-crm-api.onrender.com/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      }).then(() => {
+        document.getElementById("successMessage").textContent = "הלקוח נשמר בהצלחה ✅";
+        document.getElementById("successMessage").style.display = "block";
+        setTimeout(() => location.reload(), 1000);
+      });
+    });
 
-    function saveOpportunity() {
-      document.getElementById('opportunitySuccess').style.display = 'block';
-    }
+    document.getElementById("opportunityForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const data = Object.fromEntries(new FormData(this));
+      fetch("https://promixed-crm-api.onrender.com/opportunities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      }).then(() => {
+        document.getElementById("successMessage").textContent = "ההזדמנות נשמרה בהצלחה ✅";
+        document.getElementById("successMessage").style.display = "block";
+        setTimeout(() => location.reload(), 1000);
+      });
+    });
 
     dealValue.addEventListener('input', updateForecast);
     dealStage.addEventListener('change', updateForecast);
 
     updateForecast();
-    updateTimestamps();
     loadClientsFromDB();
   </script>
 </body>
