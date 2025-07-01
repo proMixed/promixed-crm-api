@@ -17,7 +17,7 @@
       padding: 15px;
     }
     .logo {
-      height: 60px;
+      height: 90px;
     }
     .forecast-box {
       background-color: #e0f0ff;
@@ -52,6 +52,13 @@
       content: " *";
       color: red;
     }
+    #successMessage {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+      color: green;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
@@ -62,42 +69,44 @@
     </div>
     <div class="forecast-box">תחזית: תתווסף בהמשך</div>
 
+    <div id="successMessage">✅ הלקוח נשמר בהצלחה</div>
+
     <div class="form-container">
       <!-- טופס הזנת לקוח -->
       <div class="form-section">
         <div class="form-title">הוספת לקוח חדש</div>
-        <form>
+        <form id="clientForm">
           <div class="mb-2">
             <label class="form-label required">שם חברה</label>
-            <input type="text" class="form-control" required>
+            <input type="text" class="form-control" id="company" required>
           </div>
           <div class="mb-2">
             <label class="form-label required">שם פרטי</label>
-            <input type="text" class="form-control" required>
+            <input type="text" class="form-control" id="firstName" required>
           </div>
           <div class="mb-2">
             <label class="form-label">שם משפחה</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" id="lastName">
           </div>
           <div class="mb-2">
             <label class="form-label">ת.ז / ח.פ</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" id="idOrCorp">
           </div>
           <div class="mb-2">
             <label class="form-label required">טלפון לקוח</label>
-            <input type="text" class="form-control" required>
+            <input type="text" class="form-control" id="clientPhone" required>
           </div>
           <div class="mb-2">
             <label class="form-label">טלפון חברה</label>
-            <input type="text" class="form-control">
+            <input type="text" class="form-control" id="companyPhone">
           </div>
           <div class="mb-2">
             <label class="form-label">אימייל</label>
-            <input type="email" class="form-control">
+            <input type="email" class="form-control" id="email">
           </div>
           <div class="mb-2">
             <label class="form-label required">מגזר</label>
-            <select class="form-select" required>
+            <select class="form-select" id="sector" required>
               <option>חינוך</option>
               <option>עסקי</option>
               <option>פרטי</option>
@@ -106,11 +115,11 @@
           </div>
           <div class="mb-2">
             <label class="form-label required">שם מזין</label>
-            <input type="text" class="form-control" required>
+            <input type="text" class="form-control" id="enteredBy" required>
           </div>
           <div class="mb-2">
             <label class="form-label">הגיע דרך</label>
-            <select class="form-select">
+            <select class="form-select" id="source">
               <option>טלפון</option>
               <option>אתר</option>
               <option>כנס</option>
@@ -121,14 +130,14 @@
           </div>
           <div class="mb-2">
             <label class="form-label">הערות</label>
-            <textarea class="form-control"></textarea>
+            <textarea class="form-control" id="notes"></textarea>
           </div>
           <div class="text-end text-muted small">תאריך יצירה: <span id="clientTimestamp"></span></div>
           <button type="submit" class="btn btn-primary mt-2">שמור לקוח</button>
         </form>
       </div>
 
-      <!-- טופס הזדמנות -->
+      <!-- טופס הזדמנות נשאר ללא שינוי -->
       <div class="form-section">
         <div class="form-title">הוספת הזדמנות חדשה</div>
         <form>
@@ -217,6 +226,36 @@
           select.innerHTML = data.map(client => `<option>${client[1]}</option>`).join("");
         });
     }
+
+    document.getElementById("clientForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const data = {
+        company: document.getElementById("company").value,
+        first_name: document.getElementById("firstName").value,
+        last_name: document.getElementById("lastName").value,
+        tz_or_corp: document.getElementById("idOrCorp").value,
+        client_phone: document.getElementById("clientPhone").value,
+        company_phone: document.getElementById("companyPhone").value,
+        email: document.getElementById("email").value,
+        sector: document.getElementById("sector").value,
+        entered_by: document.getElementById("enteredBy").value,
+        source: document.getElementById("source").value,
+        notes: document.getElementById("notes").value
+      };
+      fetch("https://promixed-crm-api.onrender.com/clients", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+        .then(res => res.json())
+        .then(() => {
+          document.getElementById("successMessage").style.display = "block";
+          setTimeout(() => document.getElementById("successMessage").style.display = "none", 3000);
+          loadClientsFromDB();
+          document.getElementById("clientForm").reset();
+          updateTimestamps();
+        });
+    });
 
     dealValue.addEventListener('input', updateForecast);
     dealStage.addEventListener('change', updateForecast);
