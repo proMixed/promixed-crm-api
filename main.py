@@ -1,77 +1,61 @@
-from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from typing import Optional
-import psycopg2
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+import json
 import os
+from datetime import datetime
 
-app = FastAPI()
+app = Flask(__name__)
+CORS(app)
 
-# שליפת משתני סביבה מ-Render
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
+CLIENTS_FILE = 'clients.json'
+OPPORTUNITIES_FILE = 'opportunities.json'
 
-# התחברות לבסיס הנתונים
-conn = psycopg2.connect(
-    host=DB_HOST,
-    port=DB_PORT,
-    dbname=DB_NAME,
-    user=DB_USER,
-    password=DB_PASSWORD
-)
+def save_to_file(file_path, data):
+    if not os.path.exists(file_path):
+        with open(file_path, 'w', encoding='utf-8') as f:
+            json.dump([], f, ensure_ascii=False)
 
-# מבנה לקוח
-class Client(BaseModel):
-    company: str
-    first_name: str
-    last_name: str
-    business_id: Optional[str] = None
-    phone: Optional[str] = None
-    contact_phone: Optional[str] = None
-    email: Optional[str] = None
-    sector: Optional[str] = None
-    source: Optional[str] = None
-    created_by: Optional[str] = None
-    notes: Optional[str] = None
+    with open(file_path, 'r+', encoding='utf-8') as f:
+        items = json.load(f)
+        items.append(data)
+        f.seek(0)
+        json.dump(items, f, ensure_ascii=False, indent=2)
 
-@app.get("/")
-def root():
-    return {"message": "PromiXed CRM API is running 🎉"}
+@app.route('/')
+def index():
+    return {'message': 'ProMiXed CRM API is running 🎉'}
 
-@app.get("/clients")
+@app.route('/clients', methods=['GET'])
 def get_clients():
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM clients")
-    rows = cur.fetchall()
-    cur.close()
-    return rows
+    if os.path.exists(CLIENTS_FILE):
+        with open(CLIENTS_FILE, 'r', encoding='utf-8') as f:
+            clients = json.load(f)
+    else:
+        clients = []
+    return jsonify(clients)
 
-@app.post("/clients")
-def create_client(client: Client):
-    cur = conn.cursor()
-    cur.execute("""
-        INSERT INTO clients 
-        (company, first_name, last_name, business_id, phone, contact_phone, email, sector, source, created_by, notes)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-        RETURNING id
-    """, (
-        client.company, client.first_name, client.last_name,
-        client.business_id, client.phone, client.contact_phone,
-        client.email, client.sector, client.source,
-        client.created_by, client.notes
-    ))
-    client_id = cur.fetchone()[0]
-    conn.commit()
-    cur.close()
-    return {"id": client_id}
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # אפשר לשים במקום * דומיין מסוים אם רוצים הגבלה
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+@app.route('/clients', methods=['POST'])
+def add_client():
+    data = request.get_json()
+    data['timestamp'] = datetime.now().isoformat()
+    save_to_file(CLIENTS_FILE, data)
+    return {'message': 'הלקוח נשמר בהצלחה'}
 
+@app.route('/opportunities', methods=['GET'])
+def get_opportunities():
+    if os.path.exists(OPPORTUNITIES_FILE):
+        with open(OPPORTUNITIES_FILE, 'r', encoding='utf-8') as f:
+            opportunities = json.load(f)
+    else:
+        opportunities = []
+    return jsonify(opportunities)
+
+@app.route('/opportunities', methods=['POST'])
+def add_opportunity():
+    data = request.get_json()
+    data['timestamp'] = datetime.now().isoformat()
+    save_to_file(OPPORTUNITIES_FILE, data)
+    return {'message': 'ההזדמנות נשמרה בהצלחה'}
+
+if __name__ == '__main__':
+    app.run(debug=True)
