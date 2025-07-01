@@ -39,6 +39,10 @@
       font-size: 1.3rem;
       margin-bottom: 15px;
     }
+    .required::after {
+      content: " *";
+      color: red;
+    }
   </style>
 </head>
 <body>
@@ -55,12 +59,12 @@
         <div class="form-title">הוספת לקוח חדש</div>
         <form>
           <div class="mb-2">
-            <label class="form-label">שם חברה</label>
-            <input type="text" class="form-control">
+            <label class="form-label required">שם חברה</label>
+            <input type="text" class="form-control" required>
           </div>
           <div class="mb-2">
-            <label class="form-label">שם פרטי</label>
-            <input type="text" class="form-control">
+            <label class="form-label required">שם פרטי</label>
+            <input type="text" class="form-control" required>
           </div>
           <div class="mb-2">
             <label class="form-label">שם משפחה</label>
@@ -71,16 +75,20 @@
             <input type="text" class="form-control">
           </div>
           <div class="mb-2">
-            <label class="form-label">טלפון לקוח</label>
+            <label class="form-label required">טלפון לקוח</label>
+            <input type="text" class="form-control" required>
+          </div>
+          <div class="mb-2">
+            <label class="form-label">טלפון חברה</label>
             <input type="text" class="form-control">
           </div>
           <div class="mb-2">
-            <label class="form-label">אימייל (לא חובה)</label>
+            <label class="form-label">אימייל</label>
             <input type="email" class="form-control">
           </div>
           <div class="mb-2">
-            <label class="form-label">מגזר</label>
-            <select class="form-select">
+            <label class="form-label required">מגזר</label>
+            <select class="form-select" required>
               <option>חינוך</option>
               <option>עסקי</option>
               <option>פרטי</option>
@@ -88,8 +96,8 @@
             </select>
           </div>
           <div class="mb-2">
-            <label class="form-label">שם מזין</label>
-            <input type="text" class="form-control">
+            <label class="form-label required">שם מזין</label>
+            <input type="text" class="form-control" required>
           </div>
           <div class="mb-2">
             <label class="form-label">הגיע דרך</label>
@@ -106,7 +114,7 @@
             <label class="form-label">הערות</label>
             <textarea class="form-control"></textarea>
           </div>
-          <div class="text-end text-muted small">תאריך יצירה: אוטומטי</div>
+          <div class="text-end text-muted small">תאריך יצירה: <span id="clientTimestamp"></span></div>
           <button type="submit" class="btn btn-primary mt-2">שמור לקוח</button>
         </form>
       </div>
@@ -116,15 +124,17 @@
         <div class="form-title">הוספת הזדמנות חדשה</div>
         <form>
           <div class="mb-2">
-            <label class="form-label">שם חברה (נבחר מתוך לקוחות קיימים)</label>
-            <select class="form-select">
-              <option>proMixed</option>
-              <option>Google</option>
-              <option>Another client</option>
+            <label class="form-label">שם חברה</label>
+            <select class="form-select" id="clientSelect">
+              <option>טוען...</option>
             </select>
           </div>
           <div class="mb-2">
-            <label class="form-label">שם פונה מהלקוח (לא חובה)</label>
+            <label class="form-label">לקוח זמני</label>
+            <input type="text" class="form-control">
+          </div>
+          <div class="mb-2">
+            <label class="form-label">שם פונה מהלקוח</label>
             <input type="text" class="form-control">
           </div>
           <div class="mb-2">
@@ -163,7 +173,7 @@
             <label class="form-label">הערות</label>
             <textarea class="form-control"></textarea>
           </div>
-          <div class="text-end text-muted small">עדכון אחרון: אוטומטי</div>
+          <div class="text-end text-muted small">עדכון אחרון: <span id="opportunityTimestamp"></span></div>
           <button type="submit" class="btn btn-success mt-2">שמור הזדמנות</button>
         </form>
       </div>
@@ -174,6 +184,8 @@
     const dealValue = document.getElementById('dealValue');
     const dealStage = document.getElementById('dealStage');
     const forecastResult = document.getElementById('forecastResult');
+    const clientTimestamp = document.getElementById('clientTimestamp');
+    const opportunityTimestamp = document.getElementById('opportunityTimestamp');
 
     function updateForecast() {
       const value = parseFloat(dealValue.value) || 0;
@@ -182,8 +194,27 @@
       forecastResult.value = forecast + ' ש"ח';
     }
 
+    function updateTimestamps() {
+      const now = new Date().toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
+      clientTimestamp.textContent = now;
+      opportunityTimestamp.textContent = now;
+    }
+
+    function loadClientsFromDB() {
+      fetch("https://promixed-crm-api.onrender.com/clients")
+        .then(res => res.json())
+        .then(data => {
+          const select = document.getElementById("clientSelect");
+          select.innerHTML = data.map(client => `<option>${client[1]}</option>`).join("");
+        });
+    }
+
     dealValue.addEventListener('input', updateForecast);
     dealStage.addEventListener('change', updateForecast);
+
+    updateForecast();
+    updateTimestamps();
+    loadClientsFromDB();
   </script>
 </body>
 </html>
