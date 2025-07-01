@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>סיכום הזדמנויות - ProMixed</title>
+  <title>טבלת הזדמנויות - ProMixed</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <style>
     body {
@@ -20,28 +20,31 @@
       height: 90px;
     }
     .title {
+      flex: 1;
+      text-align: center;
       font-size: 1.8rem;
       font-weight: bold;
-      color: #007bff;
-    }
-    .top-buttons {
-      text-align: center;
-      margin-bottom: 10px;
     }
     .forecast-box {
       background-color: #e0f0ff;
       border-radius: 10px;
       padding: 10px 20px;
+      margin: 10px auto;
+      width: fit-content;
       font-weight: bold;
       color: #007bff;
       text-align: center;
-      margin-bottom: 15px;
     }
-    .table th {
-      cursor: pointer;
+    .table-responsive {
+      margin: 20px;
     }
-    .update-btn {
-      font-size: 0.9rem;
+    th, td {
+      vertical-align: middle;
+      text-align: center;
+    }
+    tfoot td {
+      font-weight: bold;
+      background-color: #f1f9ff;
     }
   </style>
 </head>
@@ -49,103 +52,79 @@
   <div class="container-fluid">
     <div class="header">
       <img src="https://raw.githubusercontent.com/proMixed/promixed-crm-api/main/Logo%20for%20heaset.png" class="logo" alt="ProMixed logo">
-      <div class="title">proMixed CRM</div>
+      <div class="title">טבלת הזדמנויות</div>
+      <div style="width:90px;"></div> <!-- רווח בשביל האיזון עם הלוגו -->
     </div>
 
-    <div class="top-buttons">
-      <button class="btn btn-primary" onclick="location.href='form.html'">טופס לקוחות / הזדמנות</button>
-      <button class="btn btn-primary" onclick="location.href='clients.html'">לקוחות</button>
-    </div>
-
-    <div class="forecast-box">
-      סה"כ תחזית: <span id="totalForecast">0 ש"ח</span>
-    </div>
-
-    <div class="text-center mb-3">
-      <input type="text" id="searchInput" class="form-control w-50 mx-auto" placeholder="🔍 חיפוש כללי בהזדמנויות">
-    </div>
+    <div class="forecast-box">סה"כ תחזית: <span id="totalForecast">0 ש"ח</span></div>
 
     <div class="table-responsive">
-      <table class="table table-bordered text-center">
+      <table class="table table-bordered table-striped" id="opportunitiesTable">
         <thead class="table-primary">
           <tr>
-            <th onclick="sortTable(0)">שם חברה ⬍</th>
-            <th onclick="sortTable(1)">מתעניין ב ⬍</th>
-            <th onclick="sortTable(2)">שלב ⬍</th>
-            <th onclick="sortTable(3)">סכום עסקה ⬍</th>
-            <th onclick="sortTable(4)">סה"כ תחזית ⬍</th>
-            <th onclick="sortTable(5)">עדכון אחרון ⬍</th>
-            <th>פעולות</th>
+            <th>שם חברה</th>
+            <th>לקוח זמני</th>
+            <th>שם פונה</th>
+            <th>נושא</th>
+            <th>היקף</th>
+            <th>שלב</th>
+            <th>תחזית</th>
+            <th>הערות</th>
+            <th>עדכון אחרון</th>
           </tr>
         </thead>
-        <tbody id="oppsBody"></tbody>
+        <tbody id="opportunitiesBody">
+          <!-- נתונים ייטענו כאן -->
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="6">סה"כ תחזית:</td>
+            <td colspan="3" id="totalForecastFooter">0 ש"ח</td>
+          </tr>
+        </tfoot>
       </table>
     </div>
   </div>
 
   <script>
-    const API_URL = "https://promixed-crm-api.onrender.com/opportunities";
+    async function loadOpportunities() {
+      try {
+        const res = await fetch("https://promixed-crm-api.onrender.com/opportunities");
+        const data = await res.json();
+        const body = document.getElementById("opportunitiesBody");
+        const totalForecastSpan = document.getElementById("totalForecast");
+        const totalForecastFooter = document.getElementById("totalForecastFooter");
+        body.innerHTML = "";
 
-    function formatDate(dateStr) {
-      const d = new Date(dateStr);
-      if (isNaN(d)) return "-";
-      return d.toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
+        let total = 0;
+
+        data.forEach(op => {
+          const row = document.createElement("tr");
+          const forecast = parseFloat(op[6]) || 0;
+          total += forecast;
+
+          row.innerHTML = `
+            <td>${op[0]}</td>
+            <td>${op[1]}</td>
+            <td>${op[2]}</td>
+            <td>${op[3]}</td>
+            <td>${op[4]}</td>
+            <td>${op[5]}</td>
+            <td>${forecast.toLocaleString()} ש"ח</td>
+            <td>${op[7]}</td>
+            <td>${new Date(op[8]).toLocaleString('he-IL')}</td>
+          `;
+          body.appendChild(row);
+        });
+
+        totalForecastSpan.textContent = total.toLocaleString() + ' ש"ח';
+        totalForecastFooter.textContent = total.toLocaleString() + ' ש"ח';
+      } catch (err) {
+        console.error("שגיאה בטעינת ההזדמנויות", err);
+      }
     }
 
-    function updateTable(data) {
-      const body = document.getElementById('oppsBody');
-      const totalSpan = document.getElementById('totalForecast');
-      let total = 0;
-      body.innerHTML = "";
-      data.forEach((o) => {
-        const forecast = parseFloat(o[4]) || 0;
-        total += forecast;
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td>${o[0] || ""}</td>
-          <td>${o[1] || ""}</td>
-          <td>${o[2] || ""}</td>
-          <td>${o[3] || 0}</td>
-          <td>${forecast.toFixed(2)} ש"ח</td>
-          <td>${formatDate(o[5])}</td>
-          <td>
-            <button class="btn btn-outline-primary btn-sm update-btn" onclick="editOpportunity('${o[6]}')">עדכון הזדמנות</button>
-            <button class="btn btn-outline-secondary btn-sm">+ הוספת הערה</button>
-          </td>
-        `;
-        body.appendChild(row);
-      });
-      totalSpan.textContent = total.toLocaleString('he-IL') + ' ש"ח';
-    }
-
-    function sortTable(colIndex) {
-      const table = document.querySelector("table");
-      const rows = Array.from(table.rows).slice(1);
-      let sorted = rows.sort((a, b) => {
-        return a.cells[colIndex].innerText.localeCompare(b.cells[colIndex].innerText);
-      });
-      if (table.sortedCol === colIndex) sorted.reverse();
-      table.sortedCol = colIndex;
-      rows.forEach(r => table.tBodies[0].appendChild(r));
-    }
-
-    function filterTable() {
-      const val = document.getElementById("searchInput").value.toLowerCase();
-      const rows = document.querySelectorAll("#oppsBody tr");
-      rows.forEach(row => {
-        row.style.display = [...row.cells].some(td => td.innerText.toLowerCase().includes(val)) ? "" : "none";
-      });
-    }
-
-    function editOpportunity(id) {
-      window.location.href = `form.html?edit=${id}`;
-    }
-
-    document.getElementById("searchInput").addEventListener("input", filterTable);
-
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => updateTable(data));
+    loadOpportunities();
   </script>
 </body>
 </html>
