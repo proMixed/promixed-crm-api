@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>רשימת לקוחות - PROMIXED</title>
+  <title>רשימת לקוחות - ProMixed</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
   <style>
     body {
@@ -14,134 +14,137 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 20px;
+      padding: 15px;
     }
-    .header h1 {
-      margin: 0;
+    .logo {
+      height: 90px;
+    }
+    .title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #007bff;
+    }
+    .top-buttons {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .top-buttons button {
+      margin: 0 10px;
       font-weight: bold;
     }
-    table {
-      direction: rtl;
-    }
-    th {
+    table th {
       cursor: pointer;
     }
-    .search-box {
-      margin: 20px;
-      max-width: 400px;
+    .success-message {
+      text-align: center;
+      color: green;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .update-btn {
+      font-size: 0.9rem;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>רשימת לקוחות</h1>
-    <img src="https://raw.githubusercontent.com/proMixed/promixed-crm-api/main/Logo%20for%20heaset.png" alt="promixed logo" style="height: 60px;">
-  </div>
+  <div class="container-fluid">
+    <div class="header">
+      <img src="https://raw.githubusercontent.com/proMixed/promixed-crm-api/main/Logo%20for%20heaset.png" class="logo" alt="ProMixed logo">
+      <div class="title">proMixed CRM</div>
+    </div>
 
-  <div class="search-box mx-auto">
-    <input type="text" id="searchInput" class="form-control" placeholder="🔍 חיפוש כללי: הקלד שם, טלפון, מגזר, תאריך...">
-  </div>
+    <div class="top-buttons">
+      <button class="btn btn-primary" onclick="location.href='form.html'">טופס לקוחות / הזדמנות</button>
+      <button class="btn btn-primary" onclick="location.href='opportunities.html'">הזדמנויות</button>
+    </div>
 
-  <div class="container">
-    <table class="table table-striped table-bordered text-center" id="clientsTable">
-      <thead class="table-primary">
-        <tr>
-          <th onclick="sortTable(0)">שם חברה</th>
-          <th onclick="sortTable(1)">שם פרטי</th>
-          <th>שם משפחה</th>
-          <th>ת.ז / ח.פ</th>
-          <th>טלפון לקוח</th>
-          <th>טלפון איש קשר</th>
-          <th>אימייל</th>
-          <th onclick="sortTable(7)">מגזר</th>
-          <th>הגיע דרך</th>
-          <th onclick="sortTable(9)">שם מזין</th>
-          <th>הערות</th>
-          <th onclick="sortTable(11)">תאריך יצירה</th>
-        </tr>
-      </thead>
-      <tbody id="clientsBody">
-        <tr><td colspan="12">טוען נתונים...</td></tr>
-      </tbody>
-    </table>
+    <div id="successMessage" class="success-message" style="display:none;">✅ הלקוח נשמר בהצלחה</div>
+
+    <div class="text-center mb-3">
+      <input type="text" id="searchInput" class="form-control w-50 mx-auto" placeholder="🔍 חיפוש כללי: הקלד שם, טלפון, מגזר, תאריך...">
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-bordered text-center">
+        <thead class="table-primary">
+          <tr>
+            <th onclick="sortTable(0)">שם חברה ⬍</th>
+            <th onclick="sortTable(1)">שם פרטי ⬍</th>
+            <th onclick="sortTable(2)">שם משפחה</th>
+            <th>ת.ז / ח.פ</th>
+            <th onclick="sortTable(4)">טלפון לקוח</th>
+            <th>טלפון איש קשר</th>
+            <th>אימייל</th>
+            <th onclick="sortTable(7)">מגזר ⬍</th>
+            <th>הגיע דרך</th>
+            <th onclick="sortTable(9)">שם מזין ⬍</th>
+            <th>הערות</th>
+            <th onclick="sortTable(11)">תאריך יצירה ⬍</th>
+            <th>עדכון</th>
+          </tr>
+        </thead>
+        <tbody id="clientsBody"></tbody>
+      </table>
+    </div>
   </div>
 
   <script>
     const API_URL = "https://promixed-crm-api.onrender.com/clients";
-    let originalData = [];
-    let currentSort = { column: -1, direction: 'none' };
-
-    fetch(API_URL)
-      .then(res => res.json())
-      .then(data => {
-        originalData = [...data];
-        renderTable(data);
-      });
-
-    function renderTable(data) {
-      const tbody = document.getElementById("clientsBody");
-      tbody.innerHTML = "";
-      data.forEach(client => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${client[1] || ""}</td>
-          <td>${client[10] || ""}</td>
-          <td>${client[11] || ""}</td>
-          <td>${client[3] || ""}</td>
-          <td>${client[2] || ""}</td>
-          <td>${client[9] || ""}</td>
-          <td>${client[8] || ""}</td>
-          <td>${client[6] || ""}</td>
-          <td>${client[7] || ""}</td>
-          <td>${client[12] || ""}</td>
-          <td>${client[13] || ""}</td>
-          <td>${formatDate(client[5])}</td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
 
     function formatDate(dateStr) {
       const d = new Date(dateStr);
-      if (isNaN(d)) return "";
+      if (isNaN(d)) return "-";
       return d.toLocaleString('he-IL', { dateStyle: 'short', timeStyle: 'short' });
     }
 
-    function sortTable(colIndex) {
-      if (currentSort.column === colIndex) {
-        if (currentSort.direction === 'asc') {
-          currentSort.direction = 'desc';
-        } else if (currentSort.direction === 'desc') {
-          currentSort.direction = 'none';
-        } else {
-          currentSort.direction = 'asc';
-        }
-      } else {
-        currentSort.column = colIndex;
-        currentSort.direction = 'asc';
-      }
-
-      if (currentSort.direction === 'none') {
-        renderTable(originalData);
-        return;
-      }
-
-      const sorted = [...originalData].sort((a, b) => {
-        const valA = a[colIndex] || "";
-        const valB = b[colIndex] || "";
-        return currentSort.direction === 'asc'
-          ? valA.localeCompare(valB)
-          : valB.localeCompare(valA);
+    function updateTable(data) {
+      const body = document.getElementById('clientsBody');
+      body.innerHTML = "";
+      data.forEach((c) => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${c[1] || ""}</td>
+          <td>${c[2] || ""}</td>
+          <td>${c[3] || ""}</td>
+          <td>${c[4] || ""}</td>
+          <td>${c[5] || ""}</td>
+          <td>${c[6] || ""}</td>
+          <td>${c[7] || ""}</td>
+          <td>${c[8] || ""}</td>
+          <td>${c[9] || ""}</td>
+          <td>${c[10] || ""}</td>
+          <td>${c[11] || ""}</td>
+          <td>${formatDate(c[12])}</td>
+          <td><button class="btn btn-outline-primary btn-sm update-btn">עדכון לקוח</button></td>
+        `;
+        body.appendChild(row);
       });
-
-      renderTable(sorted);
     }
 
-    document.getElementById("searchInput").addEventListener("input", function () {
-      const term = this.value.toLowerCase();
-      const filtered = originalData.filter(row => row.some(field => (field || "").toLowerCase().includes(term)));
-      renderTable(filtered);
-    });
+    function sortTable(colIndex) {
+      const table = document.querySelector("table");
+      const rows = Array.from(table.rows).slice(1);
+      let sorted = rows.sort((a, b) => {
+        return a.cells[colIndex].innerText.localeCompare(b.cells[colIndex].innerText);
+      });
+      if (table.sortedCol === colIndex) sorted.reverse();
+      table.sortedCol = colIndex;
+      rows.forEach(r => table.tBodies[0].appendChild(r));
+    }
+
+    function filterTable() {
+      const val = document.getElementById("searchInput").value.toLowerCase();
+      const rows = document.querySelectorAll("#clientsBody tr");
+      rows.forEach(row => {
+        row.style.display = [...row.cells].some(td => td.innerText.toLowerCase().includes(val)) ? "" : "none";
+      });
+    }
+
+    document.getElementById("searchInput").addEventListener("input", filterTable);
+
+    fetch(API_URL)
+      .then(res => res.json())
+      .then(data => updateTable(data));
   </script>
 </body>
 </html>
