@@ -26,18 +26,27 @@
       margin-top: 10px;
       font-weight: bold;
       color: #007bff;
+      text-align: center;
+    }
+    .form-container {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      gap: 20px;
+      margin-top: 20px;
     }
     .form-section {
-      padding: 20px;
+      flex: 1;
       background-color: #ffffff;
       border-radius: 12px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin: 10px;
+      padding: 20px;
     }
     .form-title {
       font-weight: bold;
       font-size: 1.3rem;
       margin-bottom: 15px;
+      text-align: center;
     }
     .required::after {
       content: " *";
@@ -48,14 +57,14 @@
 <body>
   <div class="container-fluid">
     <div class="header">
-      <img src="https://raw.githubusercontent.com/proMixed/promixed-crm-api/main/Logo%20for%20heaset.png" class="logo" alt="ProMixed logo">
       <h2 class="m-0">proMixed CRM</h2>
+      <img src="https://raw.githubusercontent.com/proMixed/promixed-crm-api/main/Logo%20for%20heaset.png" class="logo" alt="ProMixed logo">
     </div>
-    <div class="forecast-box text-center">תחזית: תתווסף בהמשך</div>
+    <div class="forecast-box">תחזית: תתווסף בהמשך</div>
 
-    <div class="row mt-4">
+    <div class="form-container">
       <!-- טופס הזנת לקוח -->
-      <div class="col-md-6 form-section">
+      <div class="form-section">
         <div class="form-title">הוספת לקוח חדש</div>
         <form>
           <div class="mb-2">
@@ -120,7 +129,7 @@
       </div>
 
       <!-- טופס הזדמנות -->
-      <div class="col-md-6 form-section">
+      <div class="form-section">
         <div class="form-title">הוספת הזדמנות חדשה</div>
         <form>
           <div class="mb-2">
