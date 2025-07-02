@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from datetime import datetime
 import csv
 import os
+from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -10,46 +10,64 @@ CORS(app)
 CLIENTS_FILE = 'clients.csv'
 OPPORTUNITIES_FILE = 'opportunities.csv'
 
-def save_to_csv(data, filename):
-    data['timestamp'] = datetime.now().isoformat()
-    file_exists = os.path.exists(filename)
-    with open(filename, mode='a', newline='', encoding='utf-8') as file:
-        writer = csv.DictWriter(file, fieldnames=data.keys())
-        if not file_exists:
-            writer.writeheader()
-        writer.writerow(data)
+# יצירה אוטומטית של קבצים אם לא קיימים
+def ensure_file_exists(filename, headers):
+    if not os.path.exists(filename):
+        with open(filename, 'w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            writer.writerow(headers)
 
-@app.route('/clients', methods=['POST'])
-def save_client():
-    data = request.get_json()
-    save_to_csv(data, CLIENTS_FILE)
-    return jsonify({'message': 'הלקוח נשמר בהצלחה'})
+ensure_file_exists(CLIENTS_FILE, [
+    'company_name', 'first_name', 'last_name', 'id_number',
+    'client_phone', 'contact_phone', 'email', 'sector',
+    'source', 'notes', 'created_at', 'submitted_by'
+])
 
+ensure_file_exists(OPPORTUNITIES_FILE, [
+    'client_name', 'opportunity_name', 'status', 'forecast',
+    'notes', 'created_at', 'submitted_by'
+])
+
+# שליחת לקוחות
 @app.route('/clients', methods=['GET'])
 def get_clients():
-    try:
-        with open(CLIENTS_FILE, mode='r', encoding='utf-8') as file:
-            reader = csv.reader(file)
-            rows = list(reader)
-        return jsonify(rows)
-    except FileNotFoundError:
-        return jsonify([])
+    with open(CLIENTS_FILE, newline='', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        return jsonify(list(reader))
 
-@app.route('/opportunities', methods=['POST'])
-def save_opportunity():
-    data = request.get_json()
-    save_to_csv(data, OPPORTUNITIES_FILE)
-    return jsonify({'message': 'ההזדמנות נשמרה בהצלחה'})
+# שמירת לקוח חדש
+@app.route('/clients', methods=['POST'])
+def add_client():
+    data = request.json
+    data['created_at'] = datetime.now().isoformat()
+    with open(CLIENTS_FILE, 'a', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=[
+            'company_name', 'first_name', 'last_name', 'id_number',
+            'client_phone', 'contact_phone', 'email', 'sector',
+            'source', 'notes', 'created_at', 'submitted_by'
+        ])
+        writer.writerow(data)
+    return jsonify({'message': 'הלקוח נשמר בהצלחה'})
 
+# שליחת הזדמנויות
 @app.route('/opportunities', methods=['GET'])
 def get_opportunities():
-    try:
-        with open(OPPORTUNITIES_FILE, mode='r', encoding='utf-8') as file:
-            reader = csv.reader(file)
-            rows = list(reader)
-        return jsonify(rows)
-    except FileNotFoundError:
-        return jsonify([])
+    with open(OPPORTUNITIES_FILE, newline='', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
+        return jsonify(list(reader))
+
+# שמירת הזדמנות חדשה
+@app.route('/opportunities', methods=['POST'])
+def add_opportunity():
+    data = request.json
+    data['created_at'] = datetime.now().isoformat()
+    with open(OPPORTUNITIES_FILE, 'a', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=[
+            'client_name', 'opportunity_name', 'status', 'forecast',
+            'notes', 'created_at', 'submitted_by'
+        ])
+        writer.writerow(data)
+    return jsonify({'message': 'הזדמנות נשמרה בהצלחה'})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
