@@ -1,61 +1,55 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import json
+import csv
 import os
 from datetime import datetime
 
 app = Flask(__name__)
 CORS(app)
 
-CLIENTS_FILE = 'clients.json'
-OPPORTUNITIES_FILE = 'opportunities.json'
+CLIENTS_FILE = 'clients.csv'
+OPPORTUNITIES_FILE = 'opportunities.csv'
 
-def save_to_file(file_path, data):
-    if not os.path.exists(file_path):
-        with open(file_path, 'w', encoding='utf-8') as f:
-            json.dump([], f, ensure_ascii=False)
+def save_to_csv(data, filename):
+    file_exists = os.path.isfile(filename)
+    with open(filename, 'a', newline='', encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile)
+        if not file_exists:
+            writer.writerow(data.keys())
+        writer.writerow(data.values())
 
-    with open(file_path, 'r+', encoding='utf-8') as f:
-        items = json.load(f)
-        items.append(data)
-        f.seek(0)
-        json.dump(items, f, ensure_ascii=False, indent=2)
+def load_from_csv(filename):
+    if not os.path.exists(filename):
+        return []
+    with open(filename, newline='', encoding='utf-8') as csvfile:
+        reader = csv.reader(csvfile)
+        return list(reader)
 
 @app.route('/')
 def index():
-    return {'message': 'ProMiXed CRM API is running 🎉'}
+    return jsonify({"message": "ProMiXed CRM API is running 🎉"})
 
-@app.route('/clients', methods=['GET'])
-def get_clients():
-    if os.path.exists(CLIENTS_FILE):
-        with open(CLIENTS_FILE, 'r', encoding='utf-8') as f:
-            clients = json.load(f)
+@app.route('/clients', methods=['POST', 'GET'])
+def clients():
+    if request.method == 'POST':
+        data = request.get_json()
+        data['timestamp'] = datetime.utcnow().isoformat()
+        save_to_csv(data, CLIENTS_FILE)
+        return jsonify({'message': 'Client saved successfully'}), 200
     else:
-        clients = []
-    return jsonify(clients)
+        data = load_from_csv(CLIENTS_FILE)
+        return jsonify(data)
 
-@app.route('/clients', methods=['POST'])
-def add_client():
-    data = request.get_json()
-    data['timestamp'] = datetime.now().isoformat()
-    save_to_file(CLIENTS_FILE, data)
-    return {'message': 'הלקוח נשמר בהצלחה'}
-
-@app.route('/opportunities', methods=['GET'])
-def get_opportunities():
-    if os.path.exists(OPPORTUNITIES_FILE):
-        with open(OPPORTUNITIES_FILE, 'r', encoding='utf-8') as f:
-            opportunities = json.load(f)
+@app.route('/opportunities', methods=['POST', 'GET'])
+def opportunities():
+    if request.method == 'POST':
+        data = request.get_json()
+        data['timestamp'] = datetime.utcnow().isoformat()
+        save_to_csv(data, OPPORTUNITIES_FILE)
+        return jsonify({'message': 'Opportunity saved successfully'}), 200
     else:
-        opportunities = []
-    return jsonify(opportunities)
-
-@app.route('/opportunities', methods=['POST'])
-def add_opportunity():
-    data = request.get_json()
-    data['timestamp'] = datetime.now().isoformat()
-    save_to_file(OPPORTUNITIES_FILE, data)
-    return {'message': 'ההזדמנות נשמרה בהצלחה'}
+        data = load_from_csv(OPPORTUNITIES_FILE)
+        return jsonify(data)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
