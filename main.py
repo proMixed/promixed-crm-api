@@ -10,46 +10,45 @@ CORS(app)
 CLIENTS_FILE = 'clients.csv'
 OPPORTUNITIES_FILE = 'opportunities.csv'
 
+
 def save_to_csv(data, filename):
     file_exists = os.path.isfile(filename)
-    with open(filename, 'a', newline='', encoding='utf-8') as csvfile:
-        writer = csv.writer(csvfile)
+    with open(filename, mode='a', newline='', encoding='utf-8') as file:
+        writer = csv.DictWriter(file, fieldnames=data.keys())
         if not file_exists:
-            writer.writerow(data.keys())
-        writer.writerow(data.values())
+            writer.writeheader()
+        writer.writerow(data)
 
-def load_from_csv(filename):
-    if not os.path.exists(filename):
+
+def read_from_csv(filename):
+    if not os.path.isfile(filename):
         return []
-    with open(filename, newline='', encoding='utf-8') as csvfile:
-        reader = csv.reader(csvfile)
+    with open(filename, newline='', encoding='utf-8') as file:
+        reader = csv.DictReader(file)
         return list(reader)
 
-@app.route('/')
-def index():
-    return jsonify({"message": "ProMiXed CRM API is running 🎉"})
 
-@app.route('/clients', methods=['POST', 'GET'])
+@app.route('/clients', methods=['GET', 'POST'])
 def clients():
     if request.method == 'POST':
         data = request.get_json()
-        data['timestamp'] = datetime.utcnow().isoformat()
+        data['timestamp'] = datetime.now().isoformat()
         save_to_csv(data, CLIENTS_FILE)
-        return jsonify({'message': 'Client saved successfully'}), 200
+        return jsonify({'message': 'הלקוח נשמר בהצלחה'})
     else:
-        data = load_from_csv(CLIENTS_FILE)
-        return jsonify(data)
+        return jsonify(read_from_csv(CLIENTS_FILE))
 
-@app.route('/opportunities', methods=['POST', 'GET'])
+
+@app.route('/opportunities', methods=['GET', 'POST'])
 def opportunities():
     if request.method == 'POST':
         data = request.get_json()
-        data['timestamp'] = datetime.utcnow().isoformat()
+        data['timestamp'] = datetime.now().isoformat()
         save_to_csv(data, OPPORTUNITIES_FILE)
-        return jsonify({'message': 'Opportunity saved successfully'}), 200
+        return jsonify({'message': 'ההזדמנות נשמרה בהצלחה'})
     else:
-        data = load_from_csv(OPPORTUNITIES_FILE)
-        return jsonify(data)
+        return jsonify(read_from_csv(OPPORTUNITIES_FILE))
+
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    app.run(debug=True)
